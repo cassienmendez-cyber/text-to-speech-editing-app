@@ -1,8 +1,12 @@
+import { Suspense, lazy } from "react";
 import type { Anchor, FlatSentence } from "../types";
 import NotesPanel from "./NotesPanel";
 import BookmarksPanel from "./BookmarksPanel";
 import Dashboard from "./Dashboard";
-import AIPanel from "./AIPanel";
+
+// Loaded on demand — keeps the AI panel and the Anthropic SDK out of the
+// initial bundle so the app starts fast, especially on mobile data.
+const AIPanel = lazy(() => import("./AIPanel"));
 
 export type Tab = "notes" | "bookmarks" | "dashboard" | "ai";
 
@@ -56,11 +60,17 @@ export default function SidePanel({
         )}
         {tab === "dashboard" && <Dashboard projectId={projectId} />}
         {tab === "ai" && (
-          <AIPanel
-            projectId={projectId}
-            current={current}
-            onOpenSettings={onOpenSettings}
-          />
+          <Suspense
+            fallback={
+              <div className="p-4 text-sm text-ink-400">Loading AI tools…</div>
+            }
+          >
+            <AIPanel
+              projectId={projectId}
+              current={current}
+              onOpenSettings={onOpenSettings}
+            />
+          </Suspense>
         )}
       </div>
     </div>

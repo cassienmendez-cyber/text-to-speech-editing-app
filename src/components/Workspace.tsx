@@ -19,9 +19,13 @@ export default function Workspace({ projectId }: { projectId: string }) {
   const setVoiceStore = useStore((s) => s.setVoice);
   const addBookmark = useStore((s) => s.addBookmark);
 
+  // Depend on the manuscript, not the whole project: playback-position and
+  // rate updates create a new project object every tick, and recomputing `flat`
+  // on those would re-run the narrator effect and loop infinitely.
+  const manuscript = project?.manuscript;
   const flat = useMemo(
-    () => (project ? flattenSentences(project.manuscript) : []),
-    [project],
+    () => (manuscript ? flattenSentences(manuscript) : []),
+    [manuscript],
   );
 
   const [currentIndex, setCurrentIndex] = useState(project?.playbackIndex ?? 0);

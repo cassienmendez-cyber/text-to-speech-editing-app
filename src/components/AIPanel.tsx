@@ -1,14 +1,12 @@
 import { useState } from "react";
 import { nanoid } from "nanoid";
 import { useStore } from "../store";
-import {
-  analyzePassage,
-  analyzePatterns,
-  describeAIError,
-  suggestRewrite,
-} from "../lib/ai";
 import type { FlatSentence, Revision } from "../types";
 import { Sparkles, Check, Settings as SettingsIcon } from "./icons";
+
+// The AI module (and the Anthropic SDK it pulls in) is loaded on demand, so it
+// stays out of the main bundle until the author actually runs an AI action.
+type AIModule = typeof import("../lib/ai");
 
 interface Props {
   projectId: string;
@@ -42,13 +40,18 @@ export default function AIPanel({ projectId, current, onOpenSettings }: Props) {
     ? project.notes.filter((n) => n.anchor.paragraphId === paragraph.id)
     : [];
 
-  async function run(action: () => Promise<void>) {
+  async function run(action: (ai: AIModule) => Promise<void>) {
     setError(null);
     setBusy(true);
     try {
-      await action();
-    } catch (err) {
-      setError(describeAIError(err));
+      const ai = await import("../lib/ai");
+      try {
+        await action(ai);
+      } catch (err) {
+        setError(ai.describeAIError(err));
+      }
+    } catch {
+      setError("Could not load the AI module. Check your connection.");
     } finally {
       setBusy(false);
     }
@@ -57,8 +60,8 @@ export default function AIPanel({ projectId, current, onOpenSettings }: Props) {
   function doSuggest() {
     setAnalysis(null);
     setDraft(null);
-    run(async () => {
-      const text = await suggestRewrite({
+    run(async (ai) => {
+      const text = await ai.suggestRewrite({
         apiKey: settings.apiKey,
         passageText,
         notes: passageNotes,
@@ -71,8 +74,8 @@ export default function AIPanel({ projectId, current, onOpenSettings }: Props) {
   function doAnalyze() {
     setDraft(null);
     setAnalysis(null);
-    run(async () => {
-      const text = await analyzePassage({
+    run(async (ai) => {
+      const text = await ai.analyzePassage({
         apiKey: settings.apiKey,
         title: current?.chapter.title ?? "Passage",
         passageText,
@@ -85,8 +88,8 @@ export default function AIPanel({ projectId, current, onOpenSettings }: Props) {
   function doPatterns() {
     setDraft(null);
     setAnalysis(null);
-    run(async () => {
-      const text = await analyzePatterns({
+    run(async (ai) => {
+      const text = await ai.analyzePatterns({
         apiKey: settings.apiKey,
         notes: project.notes,
       });
