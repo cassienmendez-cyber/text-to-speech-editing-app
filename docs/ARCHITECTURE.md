@@ -97,6 +97,12 @@ implementation.
 - **Story bible** (`src/components/StoryBible.tsx`) — CRUD for character
   profiles and worldbuilding elements, persisted per project; surfaced to the
   AI assistant as reference context.
+- **Real-time collaboration** (`src/lib/collab.ts`, `src/collab-context.tsx`) —
+  a Yjs CRDT binds the shared project (manuscript + notes/bookmarks/characters/
+  world/passes/revisions) and syncs it peer-to-peer over WebRTC (y-webrtc),
+  with optional passphrase E2E encryption. The CRDT binding is transport-
+  agnostic and unit-tested; playback position/rate/voice stay per-user. Loaded
+  on demand to keep Yjs/y-webrtc out of the main bundle.
 - **Desktop shell** (`src-tauri/`) — A Tauri wrapper that loads the same React
   frontend (`frontendDist: ../dist`) as a local-first native app. Building it
   requires the Tauri/WebKitGTK system prerequisites.

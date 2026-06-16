@@ -40,6 +40,8 @@ interface AppState {
   removeProject: (id: string) => void;
   setCurrent: (id: string | null) => void;
   current: () => Project | null;
+  /** Replace a whole project (used by real-time collaboration sync). */
+  replaceProject: (project: Project) => void;
 
   // Story bible — characters & worldbuilding
   addCharacter: (projectId: string, character: CharacterProfile) => void;
@@ -161,6 +163,12 @@ export const useStore = create<AppState>()(
         }),
 
       setCurrent: (id) => set({ currentId: id }),
+
+      replaceProject: (project) =>
+        set((s) => ({
+          projects: { ...s.projects, [project.manuscript.id]: project },
+          currentId: project.manuscript.id,
+        })),
 
       current: () => {
         const { projects, currentId } = get();

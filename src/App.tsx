@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { useStore } from "./store";
+import { CollabProvider } from "./collab-context";
 import Library from "./components/Library";
 import Workspace from "./components/Workspace";
 
@@ -13,8 +14,9 @@ export default function App() {
     document.documentElement.classList.toggle("hc", highContrast);
   }, [highContrast]);
 
-  if (currentId && exists) {
-    return <Workspace projectId={currentId} />;
-  }
-  return <Library />;
+  return (
+    <CollabProvider>
+      {currentId && exists ? <Workspace projectId={currentId} /> : <Library />}
+    </CollabProvider>
+  );
 }
