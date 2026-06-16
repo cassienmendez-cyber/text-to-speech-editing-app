@@ -190,6 +190,8 @@ export interface Settings {
   highContrast: boolean;
   /** Accessibility: speak short confirmations after key actions. */
   spokenConfirmations: boolean;
+  /** Color theme id (ember / halloween / ocean / irish / rainbow / …). */
+  theme: string;
 }
 
 /** A flattened, ordered reference to a sentence and its location. */

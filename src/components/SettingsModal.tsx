@@ -23,19 +23,59 @@ const CONFIDENCE: { value: DrivingConfidence; label: string; desc: string }[] = 
   { value: "expert", label: "Expert", desc: "Notes save automatically." },
 ];
 
+// Swatch colors mirror each theme's accent so the picker previews correctly
+// regardless of the active theme.
+const THEMES: { id: string; label: string; accent: string; bg: string }[] = [
+  { id: "ember", label: "Ember", accent: "#e8893a", bg: "#12141c" },
+  { id: "halloween", label: "Halloween", accent: "#ea580c", bg: "#0c0a12" },
+  { id: "ocean", label: "Ocean", accent: "#0ea5e9", bg: "#08111c" },
+  { id: "irish", label: "Luck o' the Irish", accent: "#22c55e", bg: "#07140d" },
+  { id: "rainbow", label: "Rainbow", accent: "#d946ef", bg: "#0c0a14" },
+  { id: "synthwave", label: "Synthwave", accent: "#db2777", bg: "#0e0b1a" },
+  { id: "hilo", label: "Hi-Lo", accent: "#84f028", bg: "#000000" },
+  { id: "sakura", label: "Sakura", accent: "#ec6ead", bg: "#160f14" },
+];
+
 export default function SettingsModal({ onClose }: { onClose: () => void }) {
   const settings = useStore((s) => s.settings);
   const setSetting = useStore((s) => s.setSetting);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
-      <div className="card max-h-[90vh] w-full max-w-lg space-y-5 overflow-y-auto border-ink-700">
+    <div className="modal-scrim">
+      <div className="sheet max-h-[90vh] w-full max-w-lg space-y-5 overflow-y-auto">
         <div className="flex items-center justify-between">
           <h3 className="text-lg font-semibold text-ink-50">Settings</h3>
           <button className="btn-icon h-8 w-8" onClick={onClose}>
             <X className="h-4 w-4" />
           </button>
         </div>
+
+        <section className="space-y-2">
+          <h4 className="text-xs font-semibold uppercase tracking-wide text-ink-400">
+            Theme
+          </h4>
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+            {THEMES.map((t) => (
+              <button
+                key={t.id}
+                onClick={() => setSetting("theme", t.id)}
+                className={`flex items-center gap-2 rounded-lg border p-2 text-left text-xs ${
+                  settings.theme === t.id
+                    ? "border-accent-500 text-ink-50"
+                    : "border-ink-700 text-ink-300 hover:border-ink-600"
+                }`}
+              >
+                <span
+                  className="h-5 w-5 shrink-0 rounded-full border border-white/20"
+                  style={{
+                    background: `radial-gradient(circle at 30% 30%, ${t.accent}, ${t.bg})`,
+                  }}
+                />
+                {t.label}
+              </button>
+            ))}
+          </div>
+        </section>
 
         <section className="space-y-2">
           <h4 className="text-xs font-semibold uppercase tracking-wide text-ink-400">

@@ -112,8 +112,8 @@ export default function NoteComposer({
   const micAvailable = recordingSupported() || sttSupported();
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
-      <div className="card max-h-[90vh] w-full max-w-lg space-y-4 overflow-y-auto border-ink-700">
+    <div className="modal-scrim">
+      <div className="sheet max-h-[90vh] w-full max-w-lg space-y-4 overflow-y-auto">
         <div className="flex items-center justify-between">
           <h3 className="text-lg font-semibold text-ink-50">New revision note</h3>
           <span className="chip capitalize">{anchor.level}</span>

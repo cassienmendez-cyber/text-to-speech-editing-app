@@ -9,8 +9,8 @@ export default function CollabModal({ onClose }: { onClose: () => void }) {
   const [passphrase, setPassphrase] = useState("");
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
-      <div className="card w-full max-w-md space-y-4 border-ink-700">
+    <div className="modal-scrim">
+      <div className="sheet w-full max-w-md space-y-4">
         <div className="flex items-center justify-between">
           <h3 className="flex items-center gap-2 text-lg font-semibold text-ink-50">
             <Users className="h-5 w-5 text-accent-500" /> Live collaboration

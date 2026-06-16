@@ -24,6 +24,7 @@ const DEFAULT_SETTINGS: Settings = {
   customCategories: [],
   highContrast: false,
   spokenConfirmations: false,
+  theme: "ember",
 };
 
 interface AppState {
@@ -487,7 +488,7 @@ export const useStore = create<AppState>()(
     }),
     {
       name: "storyscribe-v1",
-      version: 5,
+      version: 6,
       migrate: (persisted: any, version) => {
         if (!persisted) return persisted;
         const projects = persisted.projects ?? {};
@@ -519,6 +520,10 @@ export const useStore = create<AppState>()(
         }
         if (version < 5) {
           // Custom categories + accessibility settings.
+          persisted.settings = { ...DEFAULT_SETTINGS, ...persisted.settings };
+        }
+        if (version < 6) {
+          // Color themes.
           persisted.settings = { ...DEFAULT_SETTINGS, ...persisted.settings };
         }
         return persisted;
