@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef } from "react";
 import type { FlatSentence, Manuscript, Note } from "../types";
+import type { Segment } from "../lib/mentions";
 
 interface Props {
   manuscript: Manuscript;
@@ -8,6 +9,9 @@ interface Props {
   notes: Note[];
   readerMode: boolean;
   onSeek: (index: number) => void;
+  /** sentenceId → segments, for linking character/world names to profiles. */
+  segments?: Map<string, Segment[]>;
+  onEntityClick?: (entityId: string) => void;
 }
 
 export default function Reader({
@@ -17,6 +21,8 @@ export default function Reader({
   notes,
   readerMode,
   onSeek,
+  segments,
+  onEntityClick,
 }: Props) {
   const activeRef = useRef<HTMLSpanElement>(null);
 
@@ -63,6 +69,10 @@ export default function Reader({
                   const active = idx === currentIndex;
                   const hasNote =
                     !readerMode && annotated.sentences.has(sentence.id);
+                  const segs =
+                    !readerMode && segments
+                      ? segments.get(sentence.id)
+                      : undefined;
                   return (
                     <span
                       key={sentence.id}
@@ -73,7 +83,25 @@ export default function Reader({
                       onClick={() => onSeek(idx)}
                       title="Click to set the active location"
                     >
-                      {sentence.text}{" "}
+                      {segs
+                        ? segs.map((s, i) =>
+                            s.entityId ? (
+                              <button
+                                key={i}
+                                className="rounded bg-accent-500/15 px-0.5 font-medium text-accent-300 hover:bg-accent-500/30"
+                                title="Open in Story Bible"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  onEntityClick?.(s.entityId!);
+                                }}
+                              >
+                                {s.text}
+                              </button>
+                            ) : (
+                              <span key={i}>{s.text}</span>
+                            ),
+                          )
+                        : sentence.text}{" "}
                     </span>
                   );
                 })}

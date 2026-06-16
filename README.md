@@ -153,6 +153,9 @@ Icons are generated with `npm run icons` (re-run if you change the artwork).
   (magic systems, timelines, creatures, social structures, …). The AI assistant
   references these profiles during analysis, and a **Continuity check** flags
   contradictions between a passage and your established characters/world rules.
+- **Bible ↔ manuscript linking** — recognized character/world names are
+  highlighted in the reader and click through to their profile; each profile
+  lists every place it's mentioned with jump-to-location.
 
 **Desktop**
 

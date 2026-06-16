@@ -111,6 +111,30 @@ try {
     await page.waitForSelector(".sentence", { timeout: 5000 });
   });
 
+  await step("manuscript ↔ bible linking round-trip", async () => {
+    // "Mara" appears in the sample manuscript and is now a clickable link.
+    await page.waitForFunction(() =>
+      [...document.querySelectorAll("article button")].some(
+        (b) => b.textContent.trim() === "Mara",
+      ),
+    );
+    await page.evaluate(() => {
+      const link = [...document.querySelectorAll("article button")].find(
+        (b) => b.textContent.trim() === "Mara",
+      );
+      link.click();
+    });
+    // The character's profile opens, showing where it's mentioned.
+    // Use textContent (not innerText) so the CSS uppercase heading still matches.
+    await page.waitForFunction(
+      () =>
+        document.body.textContent.includes("Mentions in the manuscript"),
+      { timeout: 8000 },
+    );
+    await page.click('button[title="Close"]');
+    await page.waitForSelector(".sentence", { timeout: 5000 });
+  });
+
   await step("enter and exit Drive Mode", async () => {
     await page.click('button[title="Hands-free review for the car"]');
     await waitText(page, "Drive Mode");

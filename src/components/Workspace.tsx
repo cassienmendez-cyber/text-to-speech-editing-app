@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { nanoid } from "nanoid";
 import { useStore } from "../store";
 import { flattenSentences } from "../lib/parse";
+import { analyzeMentions, buildEntities } from "../lib/mentions";
 import { Narrator, loadVoices, ttsSupported } from "../lib/speech";
 import type { Anchor, Bookmark } from "../types";
 import Reader from "./Reader";
@@ -37,6 +38,14 @@ export default function Workspace({ projectId }: { projectId: string }) {
     [manuscript],
   );
 
+  // Story-bible ↔ manuscript links: where each character/world name appears,
+  // and per-sentence segments so the reader can render them as profile links.
+  const mentions = useMemo(() => {
+    if (!project) return null;
+    const entities = buildEntities(project);
+    return analyzeMentions(flat, entities);
+  }, [flat, project?.characters, project?.world]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const [currentIndex, setCurrentIndex] = useState(project?.playbackIndex ?? 0);
   const [playing, setPlaying] = useState(false);
   const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
@@ -46,6 +55,7 @@ export default function Workspace({ projectId }: { projectId: string }) {
   const [driveOpen, setDriveOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [bibleOpen, setBibleOpen] = useState(false);
+  const [bibleFocus, setBibleFocus] = useState<string | null>(null);
   // Mobile-only: the editorial panel opens as a slide-in drawer.
   const [panelOpen, setPanelOpen] = useState(false);
 
@@ -213,6 +223,11 @@ export default function Workspace({ projectId }: { projectId: string }) {
             notes={project.notes}
             readerMode={readerMode}
             onSeek={(i) => narrator.seek(i)}
+            segments={mentions?.segmentsBySentenceId}
+            onEntityClick={(id) => {
+              setBibleFocus(id);
+              setBibleOpen(true);
+            }}
           />
         </main>
 
@@ -313,7 +328,21 @@ export default function Workspace({ projectId }: { projectId: string }) {
       {settingsOpen && <SettingsModal onClose={() => setSettingsOpen(false)} />}
 
       {bibleOpen && (
-        <StoryBible projectId={projectId} onClose={() => setBibleOpen(false)} />
+        <StoryBible
+          projectId={projectId}
+          flat={flat}
+          mentionIndex={mentions?.byEntity}
+          focusEntityId={bibleFocus}
+          onJumpTo={(i) => {
+            narrator.seek(i);
+            setBibleOpen(false);
+            setBibleFocus(null);
+          }}
+          onClose={() => {
+            setBibleOpen(false);
+            setBibleFocus(null);
+          }}
+        />
       )}
     </div>
   );

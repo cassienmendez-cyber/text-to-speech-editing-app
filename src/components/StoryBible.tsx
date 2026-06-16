@@ -1,14 +1,27 @@
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { nanoid } from "nanoid";
 import { useStore } from "../store";
 import type {
   CharacterProfile,
+  FlatSentence,
   WorldCategory,
   WorldElement,
 } from "../types";
 import { X, Plus, Trash, ArrowLeft } from "./icons";
 
 type Section = "characters" | "world";
+
+/** entityId → flat sentence indices where it is mentioned. */
+type MentionIndex = Map<string, { indices: number[] }>;
+
+interface BibleProps {
+  projectId: string;
+  onClose: () => void;
+  flat?: FlatSentence[];
+  mentionIndex?: MentionIndex;
+  focusEntityId?: string | null;
+  onJumpTo?: (flatIndex: number) => void;
+}
 
 const WORLD_CATEGORIES: WorldCategory[] = [
   "Magic System",
@@ -53,19 +66,33 @@ function emptyWorld(): WorldElement {
 export default function StoryBible({
   projectId,
   onClose,
-}: {
-  projectId: string;
-  onClose: () => void;
-}) {
+  flat,
+  mentionIndex,
+  focusEntityId,
+  onJumpTo,
+}: BibleProps) {
   const project = useStore((s) => s.projects[projectId]);
-  const [section, setSection] = useState<Section>("characters");
+  const [section, setSection] = useState<Section>(() => {
+    if (focusEntityId && project?.world.some((w) => w.id === focusEntityId))
+      return "world";
+    return "characters";
+  });
   const [editing, setEditing] = useState<
     | { type: "character"; draft: CharacterProfile; isNew: boolean }
     | { type: "world"; draft: WorldElement; isNew: boolean }
     | null
-  >(null);
+  >(() => {
+    if (!focusEntityId || !project) return null;
+    const c = project.characters.find((x) => x.id === focusEntityId);
+    if (c) return { type: "character", draft: c, isNew: false };
+    const w = project.world.find((x) => x.id === focusEntityId);
+    if (w) return { type: "world", draft: w, isNew: false };
+    return null;
+  });
 
   if (!project) return null;
+
+  const mentionCount = (id: string) => mentionIndex?.get(id)?.indices.length ?? 0;
 
   return (
     <div className="fixed inset-0 z-50 flex flex-col bg-ink-950">
@@ -92,6 +119,13 @@ export default function StoryBible({
             draft={editing.draft}
             isNew={editing.isNew}
             onDone={() => setEditing(null)}
+            mentions={
+              <Mentions
+                indices={mentionIndex?.get(editing.draft.id)?.indices}
+                flat={flat}
+                onJumpTo={onJumpTo}
+              />
+            }
           />
         ) : (
           <WorldEditor
@@ -99,6 +133,13 @@ export default function StoryBible({
             draft={editing.draft}
             isNew={editing.isNew}
             onDone={() => setEditing(null)}
+            mentions={
+              <Mentions
+                indices={mentionIndex?.get(editing.draft.id)?.indices}
+                flat={flat}
+                onJumpTo={onJumpTo}
+              />
+            }
           />
         )
       ) : (
@@ -140,6 +181,11 @@ export default function StoryBible({
                         <p className="text-xs text-ink-400">{c.role}</p>
                       )}
                     </div>
+                    {mentionCount(c.id) > 0 && (
+                      <span className="chip text-[10px]">
+                        {mentionCount(c.id)} mentions
+                      </span>
+                    )}
                   </button>
                 ))}
                 <button
@@ -176,6 +222,11 @@ export default function StoryBible({
                       </p>
                       <p className="text-xs text-ink-400">{w.category}</p>
                     </div>
+                    {mentionCount(w.id) > 0 && (
+                      <span className="chip text-[10px]">
+                        {mentionCount(w.id)} mentions
+                      </span>
+                    )}
                   </button>
                 ))}
                 <button
@@ -201,6 +252,40 @@ export default function StoryBible({
 
 function Empty({ text }: { text: string }) {
   return <p className="mt-8 text-center text-sm text-ink-500">{text}</p>;
+}
+
+/** Jump-to list of manuscript locations where this entity is mentioned. */
+function Mentions({
+  indices,
+  flat,
+  onJumpTo,
+}: {
+  indices?: number[];
+  flat?: FlatSentence[];
+  onJumpTo?: (i: number) => void;
+}) {
+  if (!flat || !onJumpTo || !indices || indices.length === 0) return null;
+  return (
+    <section className="space-y-1 border-t border-ink-800 pt-3">
+      <h4 className="text-xs font-semibold uppercase tracking-wide text-ink-400">
+        Mentions in the manuscript ({indices.length})
+      </h4>
+      {indices.slice(0, 50).map((i) => {
+        const f = flat[i];
+        if (!f) return null;
+        return (
+          <button
+            key={i}
+            className="block w-full rounded-lg px-2 py-1.5 text-left text-xs hover:bg-ink-800"
+            onClick={() => onJumpTo(i)}
+          >
+            <span className="text-accent-400">{f.chapter.title}</span>
+            <span className="ml-2 text-ink-400">“{f.sentence.text}”</span>
+          </button>
+        );
+      })}
+    </section>
+  );
 }
 
 function Field({
@@ -239,11 +324,13 @@ function CharacterEditor({
   draft,
   isNew,
   onDone,
+  mentions,
 }: {
   projectId: string;
   draft: CharacterProfile;
   isNew: boolean;
   onDone: () => void;
+  mentions?: ReactNode;
 }) {
   const addCharacter = useStore((s) => s.addCharacter);
   const updateCharacter = useStore((s) => s.updateCharacter);
@@ -268,6 +355,8 @@ function CharacterEditor({
       <Field label="Fears" value={c.fears} onChange={set("fears")} textarea />
       <Field label="Motivations" value={c.motivations} onChange={set("motivations")} textarea />
       <Field label="Background" value={c.background} onChange={set("background")} textarea />
+
+      {mentions}
 
       <div className="flex items-center justify-between pt-2">
         {!isNew ? (
@@ -303,11 +392,13 @@ function WorldEditor({
   draft,
   isNew,
   onDone,
+  mentions,
 }: {
   projectId: string;
   draft: WorldElement;
   isNew: boolean;
   onDone: () => void;
+  mentions?: ReactNode;
 }) {
   const addWorldElement = useStore((s) => s.addWorldElement);
   const updateWorldElement = useStore((s) => s.updateWorldElement);
@@ -353,6 +444,8 @@ function WorldEditor({
         onChange={(v) => setW((p) => ({ ...p, notes: v }))}
         textarea
       />
+
+      {mentions}
 
       <div className="flex items-center justify-between pt-2">
         {!isNew ? (
