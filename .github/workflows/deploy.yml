@@ -36,6 +36,11 @@ jobs:
           VITE_ICE_SERVERS: ${{ vars.VITE_ICE_SERVERS }}
       - run: touch dist/.nojekyll
       - uses: actions/configure-pages@v5
+        with:
+          # Auto-create/enable the Pages site (no manual Settings → Pages step).
+          # Requires Pages to be available for the repo (public repo, or a paid
+          # plan for private repos).
+          enablement: true
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
