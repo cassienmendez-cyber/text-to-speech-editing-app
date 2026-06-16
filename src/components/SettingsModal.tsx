@@ -1,4 +1,4 @@
-import { useStore } from "../store";
+import { useStore, clampFontScale, FONT_STEP } from "../store";
 import type { AIMode, DrivingConfidence, Settings } from "../types";
 import { X } from "./icons";
 
@@ -75,6 +75,55 @@ export default function SettingsModal({ onClose }: { onClose: () => void }) {
               </button>
             ))}
           </div>
+        </section>
+
+        <section className="space-y-2">
+          <h4 className="text-xs font-semibold uppercase tracking-wide text-ink-400">
+            Reader text size
+          </h4>
+          <div className="flex items-center gap-3">
+            <button
+              className="btn-ghost"
+              onClick={() =>
+                setSetting(
+                  "fontScale",
+                  clampFontScale(settings.fontScale - FONT_STEP),
+                )
+              }
+              aria-label="Smaller text"
+            >
+              <span className="text-xs font-semibold">A</span>
+              <span>−</span>
+            </button>
+            <span className="min-w-[3rem] text-center text-sm text-ink-200">
+              {Math.round(settings.fontScale * 100)}%
+            </span>
+            <button
+              className="btn-ghost"
+              onClick={() =>
+                setSetting(
+                  "fontScale",
+                  clampFontScale(settings.fontScale + FONT_STEP),
+                )
+              }
+              aria-label="Larger text"
+            >
+              <span className="text-lg font-semibold">A</span>
+              <span>+</span>
+            </button>
+            <button
+              className="ml-auto text-xs text-ink-400 hover:underline"
+              onClick={() => setSetting("fontScale", 1)}
+            >
+              Reset
+            </button>
+          </div>
+          <p
+            className="font-serif text-ink-200"
+            style={{ fontSize: `${(1.05 * settings.fontScale).toFixed(3)}rem` }}
+          >
+            The lighthouse had been dark for thirty years.
+          </p>
         </section>
 
         <section className="space-y-2">

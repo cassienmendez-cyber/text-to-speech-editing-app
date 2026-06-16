@@ -3,6 +3,7 @@ import { useStore } from "./store";
 import { CollabProvider } from "./collab-context";
 import Library from "./components/Library";
 import Workspace from "./components/Workspace";
+import ThemeDecor from "./components/ThemeDecor";
 
 export default function App() {
   const currentId = useStore((s) => s.currentId);
@@ -22,6 +23,7 @@ export default function App() {
 
   return (
     <CollabProvider>
+      <ThemeDecor />
       {currentId && exists ? <Workspace projectId={currentId} /> : <Library />}
     </CollabProvider>
   );

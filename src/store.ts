@@ -25,7 +25,16 @@ const DEFAULT_SETTINGS: Settings = {
   highContrast: false,
   spokenConfirmations: false,
   theme: "ember",
+  fontScale: 1,
 };
+
+/** Reader font-scale bounds. */
+export const FONT_MIN = 0.8;
+export const FONT_MAX = 1.8;
+export const FONT_STEP = 0.1;
+export function clampFontScale(v: number): number {
+  return Math.min(FONT_MAX, Math.max(FONT_MIN, Math.round(v * 10) / 10));
+}
 
 interface AppState {
   projects: Record<string, Project>;
@@ -488,7 +497,7 @@ export const useStore = create<AppState>()(
     }),
     {
       name: "storyscribe-v1",
-      version: 6,
+      version: 7,
       migrate: (persisted: any, version) => {
         if (!persisted) return persisted;
         const projects = persisted.projects ?? {};
@@ -524,6 +533,10 @@ export const useStore = create<AppState>()(
         }
         if (version < 6) {
           // Color themes.
+          persisted.settings = { ...DEFAULT_SETTINGS, ...persisted.settings };
+        }
+        if (version < 7) {
+          // Reader font scale.
           persisted.settings = { ...DEFAULT_SETTINGS, ...persisted.settings };
         }
         return persisted;

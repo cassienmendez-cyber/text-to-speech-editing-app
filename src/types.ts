@@ -192,6 +192,8 @@ export interface Settings {
   spokenConfirmations: boolean;
   /** Color theme id (ember / halloween / ocean / irish / rainbow / …). */
   theme: string;
+  /** Reader font scale (1 = default). Adjusted with the A−/A+ controls. */
+  fontScale: number;
 }
 
 /** A flattened, ordered reference to a sentence and its location. */

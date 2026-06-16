@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { nanoid } from "nanoid";
-import { useStore } from "../store";
+import { useStore, clampFontScale, FONT_STEP } from "../store";
 import { flattenSentences } from "../lib/parse";
 import { analyzeMentions, buildEntities } from "../lib/mentions";
 import { Narrator, loadVoices, speak, ttsSupported } from "../lib/speech";
@@ -61,6 +61,10 @@ export default function Workspace({ projectId }: { projectId: string }) {
   const [bibleFocus, setBibleFocus] = useState<string | null>(null);
   const [collabOpen, setCollabOpen] = useState(false);
   const collab = useCollab();
+  const fontScale = useStore((s) => s.settings.fontScale);
+  const setSetting = useStore((s) => s.setSetting);
+  const adjustFont = (delta: number) =>
+    setSetting("fontScale", clampFontScale(fontScale + delta));
   // Mobile-only: the editorial panel opens as a slide-in drawer.
   const [panelOpen, setPanelOpen] = useState(false);
 
@@ -242,6 +246,7 @@ export default function Workspace({ projectId }: { projectId: string }) {
             readerMode={readerMode}
             onSeek={(i) => narrator.seek(i)}
             segments={mentions?.segmentsBySentenceId}
+            fontScale={fontScale}
             onEntityClick={(id) => {
               setBibleFocus(id);
               setBibleOpen(true);
@@ -315,6 +320,9 @@ export default function Workspace({ projectId }: { projectId: string }) {
         onRepeat={() => narrator.seek(currentIndex)}
         onRate={(r) => setRateStore(projectId, r)}
         onVoice={(uri) => setVoiceStore(projectId, uri)}
+        fontScale={fontScale}
+        onFontSmaller={() => adjustFont(-FONT_STEP)}
+        onFontLarger={() => adjustFont(FONT_STEP)}
         onAddNote={() => {
           narrator.pause();
           setComposerOpen(true);
