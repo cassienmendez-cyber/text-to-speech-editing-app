@@ -1,4 +1,6 @@
+import { useEffect, useState } from "react";
 import { useStore, clampFontScale, FONT_STEP } from "../store";
+import { loadVoices } from "../lib/speech";
 import type { AIMode, DrivingConfidence, Settings } from "../types";
 import { X } from "./icons";
 
@@ -39,6 +41,11 @@ const THEMES: { id: string; label: string; accent: string; bg: string }[] = [
 export default function SettingsModal({ onClose }: { onClose: () => void }) {
   const settings = useStore((s) => s.settings);
   const setSetting = useStore((s) => s.setSetting);
+  const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
+
+  useEffect(() => {
+    loadVoices().then(setVoices);
+  }, []);
 
   return (
     <div className="modal-scrim">
@@ -124,6 +131,32 @@ export default function SettingsModal({ onClose }: { onClose: () => void }) {
           >
             The lighthouse had been dark for thirty years.
           </p>
+        </section>
+
+        <section className="space-y-2">
+          <h4 className="text-xs font-semibold uppercase tracking-wide text-ink-400">
+            Narration voice
+          </h4>
+          {voices.length > 0 ? (
+            <select
+              className="field"
+              value={settings.voiceURI ?? ""}
+              onChange={(e) =>
+                setSetting("voiceURI", e.target.value || undefined)
+              }
+            >
+              <option value="">System default</option>
+              {voices.map((v) => (
+                <option key={v.voiceURI} value={v.voiceURI}>
+                  {v.name}
+                </option>
+              ))}
+            </select>
+          ) : (
+            <p className="text-xs text-ink-500">
+              No text-to-speech voices available in this browser.
+            </p>
+          )}
         </section>
 
         <section className="space-y-2">

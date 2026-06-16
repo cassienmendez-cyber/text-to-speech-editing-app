@@ -194,6 +194,8 @@ export interface Settings {
   theme: string;
   /** Reader font scale (1 = default). Adjusted with the A−/A+ controls. */
   fontScale: number;
+  /** Preferred narration voice (set-and-forget; lives in Settings). */
+  voiceURI?: string;
 }
 
 /** A flattened, ordered reference to a sentence and its location. */

@@ -29,7 +29,7 @@ export default function Workspace({ projectId }: { projectId: string }) {
   const project = useStore((s) => s.projects[projectId]);
   const setCurrent = useStore((s) => s.setCurrent);
   const setRateStore = useStore((s) => s.setRate);
-  const setVoiceStore = useStore((s) => s.setVoice);
+  const voicePref = useStore((s) => s.settings.voiceURI);
   const addBookmark = useStore((s) => s.addBookmark);
 
   // Depend on the manuscript, not the whole project: playback-position and
@@ -101,9 +101,9 @@ export default function Workspace({ projectId }: { projectId: string }) {
 
   useEffect(() => {
     if (!project) return;
-    const v = voices.find((v) => v.voiceURI === project.voiceURI) ?? null;
+    const v = voices.find((v) => v.voiceURI === voicePref) ?? null;
     narrator.setVoice(v);
-  }, [narrator, voices, project?.voiceURI]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [narrator, voices, voicePref]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!project) return null;
 
@@ -313,18 +313,14 @@ export default function Workspace({ projectId }: { projectId: string }) {
       <PlaybackBar
         playing={playing}
         rate={project.rate}
-        voices={voices}
-        voiceURI={project.voiceURI}
         locationLabel={locationLabel}
         ttsAvailable={ttsSupported()}
         onPlay={() => narrator.play()}
         onPause={() => narrator.pause()}
-        onStop={() => narrator.stop()}
         onSkipBack={() => narrator.skipBackward()}
         onSkipForward={() => narrator.skipForward()}
         onRepeat={() => narrator.seek(currentIndex)}
         onRate={(r) => setRateStore(projectId, r)}
-        onVoice={(uri) => setVoiceStore(projectId, uri)}
         fontScale={fontScale}
         onFontSmaller={() => adjustFont(-FONT_STEP)}
         onFontLarger={() => adjustFont(FONT_STEP)}
