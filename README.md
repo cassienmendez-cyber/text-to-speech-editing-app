@@ -71,7 +71,64 @@ If the answer is yes, build it. If the answer is no, remove it.
 
 ---
 
-## Status
+## Getting Started
 
-This repository currently holds the **product specification** for StoryScribe.
-See the [Roadmap](docs/ROADMAP.md) for the planned phases of implementation.
+StoryScribe is a local-first web app built with **Vite + React + TypeScript +
+Tailwind CSS**. It uses the browser's native Web Speech API for text-to-speech
+narration and voice-note transcription, so no API keys are required and no
+manuscript content leaves your device.
+
+```bash
+npm install      # install dependencies
+npm run dev      # start the dev server at http://localhost:5173
+npm run build    # type-check and produce a production build in dist/
+npm run preview  # preview the production build
+```
+
+> **Browser note:** TTS narration and live voice transcription rely on the Web
+> Speech API, best supported in Chromium-based browsers (Chrome/Edge). The app
+> degrades gracefully where unsupported — you can still import, read, type
+> notes, bookmark, and use the dashboard.
+
+### Try it in 30 seconds
+
+1. Run `npm run dev` and open the app.
+2. Click **Load sample manuscript** (or import your own DOCX/TXT).
+3. Press **Play** to hear it narrated with the active sentence highlighted.
+4. Press **Add note** to capture a revision idea by voice or text.
+5. Explore the **Notes**, **Bookmarks**, and **Dashboard** tabs, or toggle
+   **Read like a reader** to hide editorial clutter.
+
+## Implemented (Phase 1 MVP)
+
+- DOCX + TXT import (chapters, paragraphs, and scene breaks preserved)
+- Audiobook playback with play / pause / stop, 15s skip, repeat, speed
+  (0.75×–2×), and voice selection
+- Live sentence highlighting and persisted listening position
+- Voice + text revision notes with preserved audio, categories, emotional tags,
+  and surrounding context
+- Sentence-level note anchoring with "go to location"
+- Google-Docs-style comment system: edit, resolve/reopen, delete, replay audio
+- Bookmarks (independently searchable)
+- Revision passes and a revision dashboard (category distribution, reaction
+  trends, resolution stats)
+- "Read like a reader" mode
+- Continuous autosave to local storage (offline-friendly)
+
+See the [Roadmap](docs/ROADMAP.md) for what's planned next, and
+[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for how it's built. Drive Mode and
+the AI editorial assistant are specified and slated for upcoming phases.
+
+## Project Structure
+
+```
+src/
+  lib/
+    parse.ts     # text -> chapters/paragraphs/sentences; flatten for playback
+    import.ts    # DOCX/TXT import (mammoth)
+    speech.ts    # TTS Narrator + voice-note capture (Web Speech API)
+  components/    # Library, Workspace, Reader, PlaybackBar, NotesPanel, ...
+  store.ts       # Zustand store with autosave persistence
+  types.ts       # core domain model
+docs/            # product spec, roadmap, architecture, drive mode, glossary
+```

@@ -1,0 +1,66 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: dark;
+  }
+
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  body {
+    @apply bg-ink-950 text-ink-100 antialiased;
+    margin: 0;
+  }
+}
+
+@layer components {
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg px-3 py-2
+      text-sm font-medium transition-colors disabled:cursor-not-allowed
+      disabled:opacity-40;
+  }
+
+  .btn-primary {
+    @apply btn bg-accent-500 text-ink-950 hover:bg-accent-400;
+  }
+
+  .btn-ghost {
+    @apply btn bg-ink-800 text-ink-100 hover:bg-ink-700;
+  }
+
+  .btn-icon {
+    @apply inline-flex h-10 w-10 items-center justify-center rounded-full
+      bg-ink-800 text-ink-100 transition-colors hover:bg-ink-700
+      disabled:opacity-40;
+  }
+
+  .card {
+    @apply rounded-xl border border-ink-800 bg-ink-900/60 p-4;
+  }
+
+  .field {
+    @apply w-full rounded-lg border border-ink-700 bg-ink-900 px-3 py-2 text-sm
+      text-ink-100 outline-none focus:border-accent-500;
+  }
+
+  .chip {
+    @apply inline-flex items-center gap-1 rounded-full border border-ink-700
+      bg-ink-800 px-2 py-0.5 text-xs text-ink-200;
+  }
+}
+
+/* Highlight for the sentence currently being narrated. */
+.sentence-active {
+  @apply rounded bg-accent-500/25 text-ink-50;
+  box-shadow: 0 0 0 2px rgba(232, 137, 58, 0.25);
+}
+
+.sentence:hover {
+  @apply bg-ink-800/60 rounded;
+}
