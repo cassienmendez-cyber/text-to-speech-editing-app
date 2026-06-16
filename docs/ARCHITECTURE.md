@@ -65,12 +65,17 @@ implementation.
 - **Revision** — An accepted change record: original text, revised text, date
   accepted, source of change, and associated note. Restorable.
 - **Category** — Built-in or custom classification for notes.
+- **CharacterProfile / WorldElement** — The story bible. Character profiles
+  (physical, personality, relationships, fears, motivations, background) and
+  worldbuilding rules (by category: magic system, timeline, creatures, social
+  structure, …). The AI assistant references these during analysis and
+  continuity checks.
 
 ---
 
 ## Key Subsystems
 
-- **Import pipeline** — DOCX/TXT (MVP); EPUB/PDF (future). Normalizes structure
+- **Import pipeline** — DOCX (mammoth), EPUB (jszip, spine order), PDF (pdfjs, geometry-based paragraphing), TXT. Normalizes structure
   into the domain model.
 - **Playback engine** — TTS narration with speed control (0.75×–2×), voice
   selection, sentence highlighting, and 15-second skip controls.
@@ -80,5 +85,20 @@ implementation.
   commands, confidence settings, and quick/emergency capture. See
   [DRIVE_MODE.md](DRIVE_MODE.md).
 - **Revision intelligence** — Dashboard, passes, emotional-tag trends, and the
-  AI editorial assistant (Phase 2+).
-- **Sync layer** — Local-first persistence with automatic background sync.
+  AI editorial assistant.
+- **AI assistant** (`src/lib/ai.ts`) — Calls the Claude API (`claude-opus-4-8`)
+  via `@anthropic-ai/sdk` with the author's own key, directly from the browser
+  and only when explicitly enabled. Provides SUGGEST (rewrite), ANALYZE
+  (developmental insight, adaptive thinking), pattern recognition, and
+  continuity checking against the story bible (`src/lib/bible.ts` assembles the
+  character/world context). Every rewrite requires explicit approval before it
+  touches the manuscript; accepted changes are recorded as restorable
+  `Revision` entries.
+- **Story bible** (`src/components/StoryBible.tsx`) — CRUD for character
+  profiles and worldbuilding elements, persisted per project; surfaced to the
+  AI assistant as reference context.
+- **Desktop shell** (`src-tauri/`) — A Tauri wrapper that loads the same React
+  frontend (`frontendDist: ../dist`) as a local-first native app. Building it
+  requires the Tauri/WebKitGTK system prerequisites.
+- **Sync layer** — Local-first persistence with automatic background sync
+  (currently `localStorage` via the Zustand persist middleware).
