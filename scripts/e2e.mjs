@@ -100,9 +100,9 @@ try {
   });
 
   await step("toggle reader mode on and off", async () => {
-    await page.click('button[title^="Hide editorial"]');
+    await page.click('button[aria-label="Toggle reading mode"]');
     await new Promise((r) => setTimeout(r, 200));
-    await page.click('button[title^="Hide editorial"]');
+    await page.click('button[aria-label="Toggle reading mode"]');
     await new Promise((r) => setTimeout(r, 200));
   });
 

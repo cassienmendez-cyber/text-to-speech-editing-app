@@ -180,11 +180,16 @@ export default function Workspace({ projectId }: { projectId: string }) {
         <button
           className={`btn-ghost shrink-0 ${readerMode ? "border border-accent-500 text-accent-400" : ""}`}
           onClick={() => setReaderMode((v) => !v)}
-          title="Hide editorial clutter and listen like a reader"
+          aria-label="Toggle reading mode"
+          title={
+            readerMode
+              ? "Reader mode — tap to take notes"
+              : "Notate mode — tap to read like a reader"
+          }
         >
-          <Eye />
+          {readerMode ? <Eye /> : <Edit />}
           <span className="hidden md:inline">
-            {readerMode ? "Reader mode: on" : "Read like a reader"}
+            {readerMode ? "Reader" : "Notate"}
           </span>
         </button>
         <button
