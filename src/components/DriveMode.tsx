@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { nanoid } from "nanoid";
 import { useStore } from "../store";
-import { Narrator, VoiceCapture, sttSupported } from "../lib/speech";
+import { Narrator, VoiceCapture, speak, sttSupported } from "../lib/speech";
 import type { Anchor, Bookmark, FlatSentence, Note } from "../types";
 import { Play, Pause, Mic, SkipBack, SkipForward, X, Check } from "./icons";
 
@@ -69,6 +69,12 @@ export default function DriveMode({
   }, [flat]);
   const startChapter = useRef(chapterIndexOf(chapterStarts, currentIndex));
 
+  // Status + optional spoken confirmation (hands-free accessibility).
+  const announce = (msg: string) => {
+    setStatus(msg);
+    if (settings.spokenConfirmations) speak(msg);
+  };
+
   function currentAnchor(): { anchor: Anchor; context: string } {
     const f = flat[indexRef.current] ?? flat[0];
     return {
@@ -112,7 +118,7 @@ export default function DriveMode({
 
   function quickNote(text: string) {
     saveNote(text, "Pacing", true);
-    setStatus(`Quick note saved: "${text.slice(0, 30)}…"`);
+    announce(`Quick note saved.`);
   }
 
   function bookmarkScene() {
@@ -126,7 +132,7 @@ export default function DriveMode({
     };
     addBookmark(projectId, bookmark);
     bookmarksAdded.current += 1;
-    setStatus("Scene bookmarked.");
+    announce("Scene bookmarked.");
   }
 
   // ---- Note capture (voice) -------------------------------------------------
@@ -152,7 +158,7 @@ export default function DriveMode({
     if (settings.drivingConfidence === "expert") {
       // Expert: save automatically without confirmation.
       saveNote(draftText, draftCategory, false);
-      setStatus("Note saved.");
+      announce("Note saved.");
       setPhase("idle");
       narrator.play();
       startCommandRecognition();
@@ -165,7 +171,7 @@ export default function DriveMode({
 
   function confirmSave() {
     saveNote(draftText, draftCategory, false);
-    setStatus("Note saved.");
+    announce("Note saved.");
     setPhase("idle");
     narrator.play();
     startCommandRecognition();
@@ -176,7 +182,7 @@ export default function DriveMode({
     captureRef.current = null;
     audioUrlRef.current = undefined;
     setPhase("idle");
-    setStatus("Note cancelled.");
+    announce("Note cancelled.");
     narrator.play();
     startCommandRecognition();
   }
@@ -212,7 +218,7 @@ export default function DriveMode({
 
   function quickNoteCat(category: string) {
     saveNote(`Flagged: ${category}`, category, true);
-    setStatus(`Flagged ${category}.`);
+    announce(`Flagged ${category}.`);
   }
 
   function startCommandRecognition() {

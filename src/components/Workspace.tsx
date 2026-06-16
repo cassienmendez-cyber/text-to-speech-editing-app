@@ -3,7 +3,7 @@ import { nanoid } from "nanoid";
 import { useStore } from "../store";
 import { flattenSentences } from "../lib/parse";
 import { analyzeMentions, buildEntities } from "../lib/mentions";
-import { Narrator, loadVoices, ttsSupported } from "../lib/speech";
+import { Narrator, loadVoices, speak, ttsSupported } from "../lib/speech";
 import type { Anchor, Bookmark } from "../types";
 import Reader from "./Reader";
 import PlaybackBar from "./PlaybackBar";
@@ -141,6 +141,7 @@ export default function Workspace({ projectId }: { projectId: string }) {
       createdAt: Date.now(),
     };
     addBookmark(projectId, bookmark);
+    if (useStore.getState().settings.spokenConfirmations) speak("Bookmarked.");
   }
 
   const { anchor: composerAnchor, context: composerContext } = currentAnchor();

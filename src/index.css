@@ -55,6 +55,40 @@
   }
 }
 
+/* High-contrast accessibility theme: pure-black surfaces, brighter text and
+   borders, stronger active highlight. Toggled via <html class="hc">. */
+html.hc body {
+  background: #000;
+  color: #fff;
+}
+html.hc .card,
+html.hc .field,
+html.hc .btn-ghost,
+html.hc .btn-icon {
+  border-color: #fff !important;
+  background: #0a0a0a !important;
+  color: #fff !important;
+}
+html.hc .chip {
+  border-color: #fff !important;
+  color: #fff !important;
+}
+/* Lift muted greys to a readable contrast. */
+html.hc .text-ink-300,
+html.hc .text-ink-400,
+html.hc .text-ink-500 {
+  color: #e6e8ee !important;
+}
+html.hc .sentence-active {
+  background: #ffae5c !important;
+  color: #000 !important;
+  box-shadow: 0 0 0 2px #fff;
+}
+html.hc .border-ink-800,
+html.hc .border-ink-700 {
+  border-color: #6b7280 !important;
+}
+
 /* Highlight for the sentence currently being narrated. */
 .sentence-active {
   @apply rounded bg-accent-500/25 text-ink-50;

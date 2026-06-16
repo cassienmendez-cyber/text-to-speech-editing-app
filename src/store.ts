@@ -21,6 +21,9 @@ const DEFAULT_SETTINGS: Settings = {
   drivingConfidence: "standard",
   wakePhrase: "hey storyscribe",
   defaultRole: "author",
+  customCategories: [],
+  highContrast: false,
+  spokenConfirmations: false,
 };
 
 interface AppState {
@@ -29,6 +32,8 @@ interface AppState {
   settings: Settings;
 
   setSetting: <K extends keyof Settings>(key: K, value: Settings[K]) => void;
+  /** Add an author-created note category (no-op if blank or already present). */
+  addCustomCategory: (name: string) => void;
 
   // Project lifecycle
   addProject: (manuscript: Manuscript) => string;
@@ -106,6 +111,23 @@ export const useStore = create<AppState>()(
 
       setSetting: (key, value) =>
         set((s) => ({ settings: { ...s.settings, [key]: value } })),
+
+      addCustomCategory: (name) =>
+        set((s) => {
+          const trimmed = name.trim();
+          if (
+            !trimmed ||
+            DEFAULT_CATEGORIES.includes(trimmed) ||
+            s.settings.customCategories.includes(trimmed)
+          )
+            return s;
+          return {
+            settings: {
+              ...s.settings,
+              customCategories: [...s.settings.customCategories, trimmed],
+            },
+          };
+        }),
 
       addProject: (manuscript) => {
         const project: Project = {
@@ -457,7 +479,7 @@ export const useStore = create<AppState>()(
     }),
     {
       name: "storyscribe-v1",
-      version: 4,
+      version: 5,
       migrate: (persisted: any, version) => {
         if (!persisted) return persisted;
         const projects = persisted.projects ?? {};
@@ -487,6 +509,10 @@ export const useStore = create<AppState>()(
             }
           }
         }
+        if (version < 5) {
+          // Custom categories + accessibility settings.
+          persisted.settings = { ...DEFAULT_SETTINGS, ...persisted.settings };
+        }
         return persisted;
       },
     },
@@ -507,6 +533,11 @@ export const DEFAULT_CATEGORIES = [
   "Delete Section",
   "Favorite Passage",
 ];
+
+/** Built-in categories plus the author's custom ones. */
+export function allCategories(custom: string[]): string[] {
+  return [...DEFAULT_CATEGORIES, ...custom];
+}
 
 export const EMOTIONAL_TAGS = [
   "Exciting",

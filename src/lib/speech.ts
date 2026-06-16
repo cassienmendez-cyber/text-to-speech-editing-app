@@ -6,6 +6,14 @@ export function ttsSupported(): boolean {
   return typeof window !== "undefined" && "speechSynthesis" in window;
 }
 
+/** Speak a short confirmation phrase (accessibility). No-op if unsupported. */
+export function speak(text: string): void {
+  if (!ttsSupported()) return;
+  const u = new SpeechSynthesisUtterance(text);
+  u.rate = 1.05;
+  window.speechSynthesis.speak(u);
+}
+
 export function getVoices(): SpeechSynthesisVoice[] {
   if (!ttsSupported()) return [];
   return window.speechSynthesis.getVoices();

@@ -184,6 +184,12 @@ export interface Settings {
   wakePhrase: string;
   /** Default role applied to new notes (author / editor / beta reader). */
   defaultRole: AuthorRole;
+  /** Author-created note categories, in addition to the built-in ones. */
+  customCategories: string[];
+  /** Accessibility: high-contrast theme. */
+  highContrast: boolean;
+  /** Accessibility: speak short confirmations after key actions. */
+  spokenConfirmations: boolean;
 }
 
 /** A flattened, ordered reference to a sentence and its location. */

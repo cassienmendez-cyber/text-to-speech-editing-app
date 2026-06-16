@@ -129,6 +129,17 @@ describe("store", () => {
     expect(useStore.getState().settings.aiMode).toBe("suggest");
   });
 
+  it("addCustomCategory adds, dedupes, and ignores built-ins/blanks", () => {
+    useStore.setState((s) => ({
+      settings: { ...s.settings, customCategories: [] },
+    }));
+    useStore.getState().addCustomCategory("Theme");
+    useStore.getState().addCustomCategory("Theme"); // dupe
+    useStore.getState().addCustomCategory("Pacing"); // built-in
+    useStore.getState().addCustomCategory("   "); // blank
+    expect(useStore.getState().settings.customCategories).toEqual(["Theme"]);
+  });
+
   it("seeds empty story-bible arrays", () => {
     const id = freshProject();
     const p = useStore.getState().projects[id];

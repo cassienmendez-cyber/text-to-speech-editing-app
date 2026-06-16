@@ -130,6 +130,9 @@ Icons are generated with `npm run icons` (re-run if you change the artwork).
   reassign category, and relocate ("move") a note to a new location
 - Author / Editor / Beta-Reader roles on notes (filterable) so collaborator
   feedback stays distinguishable
+- Author-created **custom note categories** in addition to the built-in set
+- **Accessibility**: high-contrast theme and spoken confirmations (actions read
+  aloud), alongside adjustable speed, multiple voices, and large controls
 - Bookmarks (independently searchable)
 - Revision passes and a revision dashboard (category distribution, reaction
   trends, resolution stats)

@@ -133,6 +133,30 @@ export default function SettingsModal({ onClose }: { onClose: () => void }) {
           </div>
         </section>
 
+        <section className="space-y-2">
+          <h4 className="text-xs font-semibold uppercase tracking-wide text-ink-400">
+            Accessibility
+          </h4>
+          <label className="flex items-center gap-2 text-sm text-ink-200">
+            <input
+              type="checkbox"
+              checked={settings.highContrast}
+              onChange={(e) => setSetting("highContrast", e.target.checked)}
+            />
+            High-contrast theme
+          </label>
+          <label className="flex items-center gap-2 text-sm text-ink-200">
+            <input
+              type="checkbox"
+              checked={settings.spokenConfirmations}
+              onChange={(e) =>
+                setSetting("spokenConfirmations", e.target.checked)
+              }
+            />
+            Spoken confirmations (read actions aloud)
+          </label>
+        </section>
+
         <div className="flex justify-end">
           <button className="btn-primary" onClick={onClose}>
             Done

@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
-import { useStore, DEFAULT_CATEGORIES } from "../store";
+import { useStore, allCategories } from "../store";
+import { speak } from "../lib/speech";
 import type { Anchor, AuthorRole, FlatSentence, Note } from "../types";
 import { Check, Trash, Edit } from "./icons";
 
@@ -27,6 +28,8 @@ export default function NotesPanel({ projectId, onJump, current }: Props) {
   const updateNote = useStore((s) => s.updateNote);
   const deleteNote = useStore((s) => s.deleteNote);
   const moveNote = useStore((s) => s.moveNote);
+  const settings = useStore((s) => s.settings);
+  const categories = allCategories(settings.customCategories);
 
   const [categoryFilter, setCategoryFilter] = useState("");
   const [roleFilter, setRoleFilter] = useState<"" | AuthorRole>("");
@@ -78,7 +81,7 @@ export default function NotesPanel({ projectId, onJump, current }: Props) {
           onChange={(e) => setCategoryFilter(e.target.value)}
         >
           <option value="">All categories</option>
-          {DEFAULT_CATEGORIES.map((c) => (
+          {categories.map((c) => (
             <option key={c}>{c}</option>
           ))}
         </select>
@@ -127,10 +130,10 @@ export default function NotesPanel({ projectId, onJump, current }: Props) {
                 }
                 title="Reassign category"
               >
-                {DEFAULT_CATEGORIES.map((c) => (
+                {categories.map((c) => (
                   <option key={c}>{c}</option>
                 ))}
-                {!DEFAULT_CATEGORIES.includes(note.category) && (
+                {!categories.includes(note.category) && (
                   <option>{note.category}</option>
                 )}
               </select>
@@ -213,9 +216,11 @@ export default function NotesPanel({ projectId, onJump, current }: Props) {
               )}
               <button
                 className="rounded px-2 py-1 text-ink-300 hover:bg-ink-800"
-                onClick={() =>
-                  updateNote(projectId, note.id, { resolved: !note.resolved })
-                }
+                onClick={() => {
+                  updateNote(projectId, note.id, { resolved: !note.resolved });
+                  if (settings.spokenConfirmations)
+                    speak(note.resolved ? "Reopened." : "Resolved.");
+                }}
               >
                 <span className="inline-flex items-center gap-1">
                   <Check className="h-3.5 w-3.5" />

@@ -76,9 +76,26 @@ try {
     }
   });
 
-  await step("open and close settings", async () => {
+  await step("settings: toggle high-contrast theme", async () => {
     await page.click('button[title="Settings"]');
     await waitText(page, "Anthropic API key");
+    // Flip the high-contrast checkbox and confirm the theme class applies.
+    await page.evaluate(() => {
+      const label = [...document.querySelectorAll("label")].find((l) =>
+        l.textContent.includes("High-contrast"),
+      );
+      label.querySelector("input").click();
+    });
+    await page.waitForFunction(() =>
+      document.documentElement.classList.contains("hc"),
+    );
+    // Toggle back off and close.
+    await page.evaluate(() => {
+      const label = [...document.querySelectorAll("label")].find((l) =>
+        l.textContent.includes("High-contrast"),
+      );
+      label.querySelector("input").click();
+    });
     await clickText(page, "Done");
   });
 

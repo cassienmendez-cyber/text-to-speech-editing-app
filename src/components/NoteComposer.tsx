@@ -1,7 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import { nanoid } from "nanoid";
-import { useStore, DEFAULT_CATEGORIES, EMOTIONAL_TAGS } from "../store";
-import { VoiceCapture, recordingSupported, sttSupported } from "../lib/speech";
+import { useStore, allCategories, EMOTIONAL_TAGS } from "../store";
+import {
+  VoiceCapture,
+  recordingSupported,
+  speak,
+  sttSupported,
+} from "../lib/speech";
 import type { Anchor, AuthorRole, Note } from "../types";
 import { Mic, Check } from "./icons";
 
@@ -22,7 +27,10 @@ export default function NoteComposer({
 }: Props) {
   const addNote = useStore((s) => s.addNote);
   const passes = useStore((s) => s.projects[projectId]?.passes ?? []);
-  const defaultRole = useStore((s) => s.settings.defaultRole);
+  const settings = useStore((s) => s.settings);
+  const addCustomCategory = useStore((s) => s.addCustomCategory);
+  const defaultRole = settings.defaultRole;
+  const categories = allCategories(settings.customCategories);
 
   const [text, setText] = useState("");
   const [authorRole, setAuthorRole] = useState<AuthorRole>(defaultRole);
@@ -89,7 +97,16 @@ export default function NoteComposer({
       passIds,
     };
     addNote(projectId, note);
+    if (settings.spokenConfirmations) speak("Note saved.");
     onClose();
+  }
+
+  function addCategory() {
+    const name = prompt("New category name:");
+    if (name && name.trim()) {
+      addCustomCategory(name);
+      setCategory(name.trim());
+    }
   }
 
   const micAvailable = recordingSupported() || sttSupported();
@@ -135,13 +152,22 @@ export default function NoteComposer({
 
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <label className="text-xs text-ink-400">
-            Category
+            <span className="flex items-center justify-between">
+              Category
+              <button
+                type="button"
+                className="text-accent-400 hover:underline"
+                onClick={addCategory}
+              >
+                + New
+              </button>
+            </span>
             <select
               className="field mt-1"
               value={category}
               onChange={(e) => setCategory(e.target.value)}
             >
-              {DEFAULT_CATEGORIES.map((c) => (
+              {categories.map((c) => (
                 <option key={c}>{c}</option>
               ))}
             </select>
