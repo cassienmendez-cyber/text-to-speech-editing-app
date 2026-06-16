@@ -2,8 +2,16 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import { VitePWA } from "vite-plugin-pwa";
 
+// Available at config time under Node; declared locally to avoid @types/node.
+declare const process: { env: Record<string, string | undefined> };
+
+// On GitHub Pages the app is served from /<repo>/, so the deploy workflow sets
+// BASE_PATH=/text-to-speech-editing-app/. Locally it defaults to "/".
+const base = process.env.BASE_PATH || "/";
+
 // https://vite.dev/config/
 export default defineConfig({
+  base,
   plugins: [
     react(),
     VitePWA({
@@ -22,7 +30,9 @@ export default defineConfig({
         background_color: "#12141c",
         display: "standalone",
         orientation: "portrait",
-        start_url: "/",
+        // Base-relative so installs work under the GitHub Pages subpath.
+        start_url: base,
+        scope: base,
         icons: [
           { src: "icons/pwa-192x192.png", sizes: "192x192", type: "image/png" },
           { src: "icons/pwa-512x512.png", sizes: "512x512", type: "image/png" },
@@ -35,10 +45,8 @@ export default defineConfig({
         ],
       },
       workbox: {
-        // Precache the app shell so the app works fully offline on mobile.
         globPatterns: ["**/*.{js,css,html,svg,png,woff,woff2}"],
-        navigateFallback: "index.html",
-        // The bundle (incl. the AI SDK) can exceed the default precache limit.
+        navigateFallback: `${base}index.html`,
         maximumFileSizeToCacheInBytes: 4 * 1024 * 1024,
       },
     }),
