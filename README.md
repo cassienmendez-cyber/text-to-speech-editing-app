@@ -109,7 +109,7 @@ Icons are generated with `npm run icons` (re-run if you change the artwork).
 ### Try it in 30 seconds
 
 1. Run `npm run dev` and open the app.
-2. Click **Load sample manuscript** (or import your own DOCX/TXT).
+2. Click **Load sample manuscript** (or import your own DOCX/EPUB/TXT).
 3. Press **Play** to hear it narrated with the active sentence highlighted.
 4. Press **Add note** to capture a revision idea by voice or text.
 5. Explore the **Notes**, **Bookmarks**, and **Dashboard** tabs, or toggle
@@ -119,7 +119,8 @@ Icons are generated with `npm run icons` (re-run if you change the artwork).
 
 **Phase 1 — capture (MVP)**
 
-- DOCX + TXT import (chapters, paragraphs, and scene breaks preserved)
+- DOCX + TXT + **EPUB** import (chapters, paragraphs, and scene breaks
+  preserved; EPUB uses the spine reading order for chapters)
 - Audiobook playback with play / pause / stop, 15s skip, repeat, speed
   (0.75×–2×), and voice selection
 - Live sentence highlighting and persisted listening position
@@ -205,7 +206,7 @@ unresolved notes of a category, or every note in the current chapter) and a
 src/
   lib/
     parse.ts     # text -> chapters/paragraphs/sentences; flatten for playback
-    import.ts    # DOCX/TXT import (mammoth)
+    import.ts    # DOCX (mammoth) / EPUB (jszip) / TXT import
     speech.ts    # TTS Narrator + voice-note capture (Web Speech API)
     ai.ts        # AI editorial assistant (Anthropic SDK, claude-opus-4-8)
   components/    # Library, Workspace, Reader, PlaybackBar, NotesPanel,

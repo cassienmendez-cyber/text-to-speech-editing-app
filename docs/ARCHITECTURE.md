@@ -75,7 +75,7 @@ implementation.
 
 ## Key Subsystems
 
-- **Import pipeline** — DOCX/TXT (MVP); EPUB/PDF (future). Normalizes structure
+- **Import pipeline** — DOCX (mammoth), EPUB (jszip, spine order), TXT; PDF still future. Normalizes structure
   into the domain model.
 - **Playback engine** — TTS narration with speed control (0.75×–2×), voice
   selection, sentence highlighting, and 15-second skip controls.

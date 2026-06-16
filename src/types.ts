@@ -26,7 +26,7 @@ export interface Manuscript {
   createdAt: number;
   updatedAt: number;
   /** Source format the manuscript was imported from. */
-  source: "txt" | "docx";
+  source: "txt" | "docx" | "epub";
 }
 
 export type AnchorLevel = "sentence" | "paragraph" | "scene" | "chapter";

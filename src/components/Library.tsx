@@ -89,8 +89,8 @@ export default function Library() {
         <div>
           <p className="font-medium text-ink-100">Import a manuscript</p>
           <p className="text-sm text-ink-400">
-            Drag &amp; drop or choose a DOCX or TXT file. Everything stays on
-            your device.
+            Drag &amp; drop or choose a DOCX, EPUB, or TXT file. Everything stays
+            on your device.
           </p>
         </div>
         <div className="flex flex-wrap items-center justify-center gap-3">
@@ -108,7 +108,7 @@ export default function Library() {
         <input
           ref={inputRef}
           type="file"
-          accept=".txt,.docx"
+          accept=".txt,.docx,.epub"
           multiple
           className="hidden"
           onChange={(e) => handleFiles(e.target.files)}
