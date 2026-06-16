@@ -497,7 +497,7 @@ export const useStore = create<AppState>()(
     }),
     {
       name: "storyscribe-v1",
-      version: 7,
+      version: 8,
       migrate: (persisted: any, version) => {
         if (!persisted) return persisted;
         const projects = persisted.projects ?? {};
@@ -537,6 +537,10 @@ export const useStore = create<AppState>()(
         }
         if (version < 7) {
           // Reader font scale.
+          persisted.settings = { ...DEFAULT_SETTINGS, ...persisted.settings };
+        }
+        if (version < 8) {
+          // Voice preference moved from per-project to global settings.
           persisted.settings = { ...DEFAULT_SETTINGS, ...persisted.settings };
         }
         return persisted;

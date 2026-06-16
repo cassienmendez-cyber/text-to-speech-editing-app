@@ -29,7 +29,7 @@ export default function Workspace({ projectId }: { projectId: string }) {
   const project = useStore((s) => s.projects[projectId]);
   const setCurrent = useStore((s) => s.setCurrent);
   const setRateStore = useStore((s) => s.setRate);
-  const setVoiceStore = useStore((s) => s.setVoice);
+  const voicePref = useStore((s) => s.settings.voiceURI);
   const addBookmark = useStore((s) => s.addBookmark);
 
   // Depend on the manuscript, not the whole project: playback-position and
@@ -101,9 +101,9 @@ export default function Workspace({ projectId }: { projectId: string }) {
 
   useEffect(() => {
     if (!project) return;
-    const v = voices.find((v) => v.voiceURI === project.voiceURI) ?? null;
+    const v = voices.find((v) => v.voiceURI === voicePref) ?? null;
     narrator.setVoice(v);
-  }, [narrator, voices, project?.voiceURI]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [narrator, voices, voicePref]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!project) return null;
 
@@ -180,11 +180,16 @@ export default function Workspace({ projectId }: { projectId: string }) {
         <button
           className={`btn-ghost shrink-0 ${readerMode ? "border border-accent-500 text-accent-400" : ""}`}
           onClick={() => setReaderMode((v) => !v)}
-          title="Hide editorial clutter and listen like a reader"
+          aria-label="Toggle reading mode"
+          title={
+            readerMode
+              ? "Reader mode — tap to take notes"
+              : "Notate mode — tap to read like a reader"
+          }
         >
-          <Eye />
+          {readerMode ? <Eye /> : <Edit />}
           <span className="hidden md:inline">
-            {readerMode ? "Reader mode: on" : "Read like a reader"}
+            {readerMode ? "Reader" : "Notate"}
           </span>
         </button>
         <button
@@ -308,18 +313,14 @@ export default function Workspace({ projectId }: { projectId: string }) {
       <PlaybackBar
         playing={playing}
         rate={project.rate}
-        voices={voices}
-        voiceURI={project.voiceURI}
         locationLabel={locationLabel}
         ttsAvailable={ttsSupported()}
         onPlay={() => narrator.play()}
         onPause={() => narrator.pause()}
-        onStop={() => narrator.stop()}
         onSkipBack={() => narrator.skipBackward()}
         onSkipForward={() => narrator.skipForward()}
         onRepeat={() => narrator.seek(currentIndex)}
         onRate={(r) => setRateStore(projectId, r)}
-        onVoice={(uri) => setVoiceStore(projectId, uri)}
         fontScale={fontScale}
         onFontSmaller={() => adjustFont(-FONT_STEP)}
         onFontLarger={() => adjustFont(FONT_STEP)}
