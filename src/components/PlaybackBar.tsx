@@ -17,6 +17,9 @@ interface Props {
   onVoice: (uri: string) => void;
   onAddNote: () => void;
   onBookmark: () => void;
+  fontScale: number;
+  onFontSmaller: () => void;
+  onFontLarger: () => void;
 }
 
 const RATES = [0.75, 1, 1.25, 1.5, 1.75, 2];
@@ -77,6 +80,35 @@ export default function PlaybackBar(p: Props) {
           <span className="mx-1 hidden h-6 w-px bg-ink-700 sm:block" />
 
           {/* Primary action — always visible */}
+          {/* Reader font size — obvious A− / A+ controls. */}
+          <div
+            className="flex items-center overflow-hidden rounded-lg border border-ink-700"
+            title="Reader text size"
+            aria-label="Reader text size"
+          >
+            <button
+              className="flex items-center gap-0.5 px-2 py-1 text-ink-200 hover:bg-ink-800"
+              onClick={p.onFontSmaller}
+              aria-label="Smaller text"
+              title="Smaller text"
+            >
+              <span className="text-xs font-semibold">A</span>
+              <span className="text-sm">−</span>
+            </button>
+            <span className="px-1 text-[10px] text-ink-500">
+              {Math.round(p.fontScale * 100)}%
+            </span>
+            <button
+              className="flex items-center gap-0.5 px-2 py-1 text-ink-200 hover:bg-ink-800"
+              onClick={p.onFontLarger}
+              aria-label="Larger text"
+              title="Larger text"
+            >
+              <span className="text-base font-semibold">A</span>
+              <span className="text-sm">+</span>
+            </button>
+          </div>
+
           <button className="btn-primary" onClick={p.onAddNote}>
             <Mic /> Add note
           </button>

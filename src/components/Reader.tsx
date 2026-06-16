@@ -12,6 +12,8 @@ interface Props {
   /** sentenceId → segments, for linking character/world names to profiles. */
   segments?: Map<string, Segment[]>;
   onEntityClick?: (entityId: string) => void;
+  /** Reader font scale (1 = default). */
+  fontScale?: number;
 }
 
 export default function Reader({
@@ -23,6 +25,7 @@ export default function Reader({
   onSeek,
   segments,
   onEntityClick,
+  fontScale = 1,
 }: Props) {
   const activeRef = useRef<HTMLSpanElement>(null);
 
@@ -49,7 +52,10 @@ export default function Reader({
   }, [currentIndex]);
 
   return (
-    <article className="prose-reader mx-auto max-w-2xl px-6 py-8 font-serif text-[1.05rem] leading-8 text-ink-100">
+    <article
+      className="prose-reader mx-auto max-w-2xl px-6 py-8 font-serif text-ink-100"
+      style={{ fontSize: `${(1.05 * fontScale).toFixed(3)}rem`, lineHeight: 1.7 }}
+    >
       {manuscript.chapters.map((chapter) => (
         <section key={chapter.id} className="mb-10">
           <h2 className="mb-5 font-sans text-xl font-semibold text-accent-400">
