@@ -119,8 +119,9 @@ Icons are generated with `npm run icons` (re-run if you change the artwork).
 
 **Phase 1 — capture (MVP)**
 
-- DOCX + TXT + **EPUB** import (chapters, paragraphs, and scene breaks
-  preserved; EPUB uses the spine reading order for chapters)
+- DOCX + TXT + **EPUB** + **PDF** import (chapters, paragraphs, and scene
+  breaks preserved; EPUB uses spine reading order; PDF reconstructs paragraphs
+  from text geometry with de-hyphenation)
 - Audiobook playback with play / pause / stop, 15s skip, repeat, speed
   (0.75×–2×), and voice selection
 - Live sentence highlighting and persisted listening position
@@ -206,7 +207,7 @@ unresolved notes of a category, or every note in the current chapter) and a
 src/
   lib/
     parse.ts     # text -> chapters/paragraphs/sentences; flatten for playback
-    import.ts    # DOCX (mammoth) / EPUB (jszip) / TXT import
+    import.ts    # DOCX (mammoth) / EPUB (jszip) / PDF (pdfjs) / TXT import
     speech.ts    # TTS Narrator + voice-note capture (Web Speech API)
     ai.ts        # AI editorial assistant (Anthropic SDK, claude-opus-4-8)
   components/    # Library, Workspace, Reader, PlaybackBar, NotesPanel,

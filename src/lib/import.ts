@@ -6,7 +6,34 @@ import {
   resolvePath,
   xhtmlToSection,
 } from "./epub";
+import { pagesToText, type PdfItem } from "./pdf";
 import type { Manuscript } from "../types";
+
+async function importPdf(file: File): Promise<Manuscript> {
+  // pdfjs (and its worker) are dynamically imported so they stay out of the
+  // main bundle — only loaded when a PDF is actually imported.
+  const pdfjs = await import("pdfjs-dist");
+  const workerUrl = (
+    await import("pdfjs-dist/build/pdf.worker.min.mjs?url")
+  ).default as string;
+  pdfjs.GlobalWorkerOptions.workerSrc = workerUrl;
+
+  const data = new Uint8Array(await file.arrayBuffer());
+  const doc = await pdfjs.getDocument({ data }).promise;
+  const pages: PdfItem[][] = [];
+  for (let i = 1; i <= doc.numPages; i += 1) {
+    const page = await doc.getPage(i);
+    const content = await page.getTextContent();
+    const items: PdfItem[] = content.items
+      .filter((it): it is typeof it & { str: string; transform: number[] } =>
+        "str" in it,
+      )
+      .map((it) => ({ str: it.str, x: it.transform[4], y: it.transform[5] }));
+    pages.push(items);
+  }
+  const title = stripExtension(file.name);
+  return parseManuscript(pagesToText(pages), title, "pdf");
+}
 
 async function importEpub(file: File): Promise<Manuscript> {
   // JSZip is dynamically imported so it stays out of the main bundle.
@@ -69,6 +96,10 @@ export async function importManuscriptFile(file: File): Promise<Manuscript> {
     return importEpub(file);
   }
 
+  if (name.endsWith(".pdf")) {
+    return importPdf(file);
+  }
+
   if (name.endsWith(".doc")) {
     throw new Error(
       "Legacy .doc files are not supported. Please save as .docx or .txt.",
@@ -76,6 +107,6 @@ export async function importManuscriptFile(file: File): Promise<Manuscript> {
   }
 
   throw new Error(
-    `Unsupported format: ${file.name}. Supported formats are DOCX, EPUB, and TXT.`,
+    `Unsupported format: ${file.name}. Supported formats are DOCX, EPUB, PDF, and TXT.`,
   );
 }

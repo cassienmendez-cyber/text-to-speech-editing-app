@@ -7,7 +7,7 @@ while preserving the core principle of complete author control.
 > (Phase 1), revision intelligence including batch assistance (Phase 2), and
 > editorial intelligence including the character/worldbuilding databases,
 > continuity checking, bible↔manuscript linking, and beta-reader roles
-> (Phase 3). The only remaining future item is PDF import (DOCX, EPUB, and TXT are supported). See the
+> (Phase 3), and all four import formats (DOCX, TXT, EPUB, PDF). See the
 > README's "Implemented" section for specifics.
 
 ---
