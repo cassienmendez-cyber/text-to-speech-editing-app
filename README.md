@@ -90,6 +90,22 @@ npm run preview  # preview the production build
 > degrades gracefully where unsupported — you can still import, read, type
 > notes, bookmark, and use the dashboard.
 
+### Mobile & install (PWA)
+
+StoryScribe is fully responsive and works as an installable Progressive Web App
+— **everything you can do on the desktop, you can do on a phone**:
+
+- Responsive layout throughout: the editorial panel (Notes / Bookmarks /
+  Dashboard / AI) becomes a slide-in drawer on small screens, the playback bar
+  reflows, and the header collapses to touch-friendly icons.
+- Installable to the home screen (manifest + service worker) with an offline
+  app shell, standalone display, and iOS safe-area handling.
+- Drive Mode's oversized, hands-free controls are designed for phone-in-the-car
+  use.
+
+To install: open the app in a mobile browser and choose **Add to Home Screen**.
+Icons are generated with `npm run icons` (re-run if you change the artwork).
+
 ### Try it in 30 seconds
 
 1. Run `npm run dev` and open the app.

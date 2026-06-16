@@ -313,37 +313,41 @@ export default function DriveMode({
         </div>
 
         {phase === "idle" && (
-          <div className="flex items-center gap-6">
+          <div className="flex items-center gap-5 sm:gap-6">
             <button
-              className="flex h-20 w-20 items-center justify-center rounded-full bg-ink-800 hover:bg-ink-700"
+              className="flex h-16 w-16 items-center justify-center rounded-full bg-ink-800 hover:bg-ink-700 sm:h-20 sm:w-20"
               onClick={() => narrator.skipBackward()}
               aria-label="Skip backward"
             >
-              <SkipBack className="h-8 w-8" />
+              <SkipBack className="h-7 w-7 sm:h-8 sm:w-8" />
             </button>
             <button
-              className="flex h-28 w-28 items-center justify-center rounded-full bg-accent-500 text-ink-950 hover:bg-accent-400"
+              className="flex h-24 w-24 items-center justify-center rounded-full bg-accent-500 text-ink-950 hover:bg-accent-400 sm:h-28 sm:w-28"
               onClick={() => (playing ? narrator.pause() : narrator.play())}
               aria-label={playing ? "Pause" : "Play"}
             >
-              {playing ? <Pause className="h-12 w-12" /> : <Play className="h-12 w-12" />}
+              {playing ? (
+                <Pause className="h-11 w-11 sm:h-12 sm:w-12" />
+              ) : (
+                <Play className="h-11 w-11 sm:h-12 sm:w-12" />
+              )}
             </button>
             <button
-              className="flex h-20 w-20 items-center justify-center rounded-full bg-ink-800 hover:bg-ink-700"
+              className="flex h-16 w-16 items-center justify-center rounded-full bg-ink-800 hover:bg-ink-700 sm:h-20 sm:w-20"
               onClick={() => narrator.skipForward()}
               aria-label="Skip forward"
             >
-              <SkipForward className="h-8 w-8" />
+              <SkipForward className="h-7 w-7 sm:h-8 sm:w-8" />
             </button>
           </div>
         )}
 
         {phase === "idle" && (
           <button
-            className="flex items-center gap-3 rounded-2xl bg-accent-500 px-10 py-6 text-2xl font-semibold text-ink-950 hover:bg-accent-400"
+            className="flex items-center gap-3 rounded-2xl bg-accent-500 px-8 py-5 text-xl font-semibold text-ink-950 hover:bg-accent-400 sm:px-10 sm:py-6 sm:text-2xl"
             onClick={startNoteCapture}
           >
-            <Mic className="h-8 w-8" /> Add Note
+            <Mic className="h-7 w-7 sm:h-8 sm:w-8" /> Add Note
           </button>
         )}
 

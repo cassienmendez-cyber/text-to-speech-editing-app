@@ -6,23 +6,11 @@ import { Narrator, loadVoices, ttsSupported } from "../lib/speech";
 import type { Anchor, Bookmark } from "../types";
 import Reader from "./Reader";
 import PlaybackBar from "./PlaybackBar";
-import NotesPanel from "./NotesPanel";
-import BookmarksPanel from "./BookmarksPanel";
-import Dashboard from "./Dashboard";
 import NoteComposer from "./NoteComposer";
-import AIPanel from "./AIPanel";
 import DriveMode from "./DriveMode";
 import SettingsModal from "./SettingsModal";
-import { ArrowLeft, Eye, Car, Settings as SettingsIcon } from "./icons";
-
-type Tab = "notes" | "bookmarks" | "dashboard" | "ai";
-
-const TABS: { id: Tab; label: string }[] = [
-  { id: "notes", label: "Notes" },
-  { id: "bookmarks", label: "Bookmarks" },
-  { id: "dashboard", label: "Dashboard" },
-  { id: "ai", label: "AI" },
-];
+import SidePanel, { type Tab } from "./SidePanel";
+import { ArrowLeft, Eye, Car, Settings as SettingsIcon, Edit, X } from "./icons";
 
 export default function Workspace({ projectId }: { projectId: string }) {
   const project = useStore((s) => s.projects[projectId]);
@@ -44,6 +32,8 @@ export default function Workspace({ projectId }: { projectId: string }) {
   const [composerOpen, setComposerOpen] = useState(false);
   const [driveOpen, setDriveOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  // Mobile-only: the editorial panel opens as a slide-in drawer.
+  const [panelOpen, setPanelOpen] = useState(false);
 
   const narratorRef = useRef<Narrator | null>(null);
   if (!narratorRef.current) {
@@ -133,9 +123,9 @@ export default function Workspace({ projectId }: { projectId: string }) {
 
   return (
     <div className="flex h-screen flex-col">
-      <header className="flex items-center gap-3 border-b border-ink-800 px-4 py-3">
+      <header className="flex items-center gap-2 border-b border-ink-800 px-3 py-2 sm:gap-3 sm:px-4 sm:py-3">
         <button
-          className="btn-icon"
+          className="btn-icon shrink-0"
           title="Back to library"
           onClick={() => {
             narrator.pause();
@@ -144,37 +134,52 @@ export default function Workspace({ projectId }: { projectId: string }) {
         >
           <ArrowLeft />
         </button>
-        <div className="flex-1">
-          <h1 className="font-semibold text-ink-50">{project.manuscript.title}</h1>
-          <p className="text-xs text-ink-400">
+        <div className="min-w-0 flex-1">
+          <h1 className="truncate font-semibold text-ink-50">
+            {project.manuscript.title}
+          </h1>
+          <p className="truncate text-xs text-ink-400">
             {project.manuscript.chapters.length} chapters · {project.notes.length}{" "}
             notes
           </p>
         </div>
         <button
-          className={`btn-ghost ${readerMode ? "border border-accent-500 text-accent-400" : ""}`}
+          className={`btn-ghost shrink-0 ${readerMode ? "border border-accent-500 text-accent-400" : ""}`}
           onClick={() => setReaderMode((v) => !v)}
           title="Hide editorial clutter and listen like a reader"
         >
-          <Eye /> {readerMode ? "Reader mode: on" : "Read like a reader"}
+          <Eye />
+          <span className="hidden md:inline">
+            {readerMode ? "Reader mode: on" : "Read like a reader"}
+          </span>
         </button>
         <button
-          className="btn-ghost"
+          className="btn-ghost shrink-0"
           onClick={() => {
             narrator.pause();
             setDriveOpen(true);
           }}
           title="Hands-free review for the car"
         >
-          <Car /> Drive Mode
+          <Car />
+          <span className="hidden md:inline">Drive Mode</span>
         </button>
         <button
-          className="btn-icon"
+          className="btn-icon shrink-0"
           onClick={() => setSettingsOpen(true)}
           title="Settings"
         >
           <SettingsIcon />
         </button>
+        {!readerMode && (
+          <button
+            className="btn-icon shrink-0 lg:hidden"
+            onClick={() => setPanelOpen(true)}
+            title="Notes & tools"
+          >
+            <Edit />
+          </button>
+        )}
       </header>
 
       <div className="flex min-h-0 flex-1">
@@ -189,48 +194,56 @@ export default function Workspace({ projectId }: { projectId: string }) {
           />
         </main>
 
+        {/* Desktop: persistent sidebar. */}
         {!readerMode && (
-          <aside className="flex w-[22rem] shrink-0 flex-col border-l border-ink-800 bg-ink-900/40">
-            <div className="flex border-b border-ink-800 text-sm">
-              {TABS.map((t) => (
-                <button
-                  key={t.id}
-                  className={`flex-1 py-2 ${
-                    tab === t.id
-                      ? "border-b-2 border-accent-500 text-accent-400"
-                      : "text-ink-400 hover:text-ink-200"
-                  }`}
-                  onClick={() => setTab(t.id)}
-                >
-                  {t.label}
-                </button>
-              ))}
-            </div>
-            <div className="min-h-0 flex-1">
-              {tab === "notes" && (
-                <NotesPanel
-                  projectId={projectId}
-                  onJump={(a) => narrator.seek(resolveAnchorIndex(a))}
-                />
-              )}
-              {tab === "bookmarks" && (
-                <BookmarksPanel
-                  projectId={projectId}
-                  onJump={(a) => narrator.seek(resolveAnchorIndex(a))}
-                />
-              )}
-              {tab === "dashboard" && <Dashboard projectId={projectId} />}
-              {tab === "ai" && (
-                <AIPanel
-                  projectId={projectId}
-                  current={flatCurrent}
-                  onOpenSettings={() => setSettingsOpen(true)}
-                />
-              )}
-            </div>
+          <aside className="hidden w-[22rem] shrink-0 flex-col border-l border-ink-800 bg-ink-900/40 lg:flex">
+            <SidePanel
+              projectId={projectId}
+              tab={tab}
+              setTab={setTab}
+              current={flatCurrent}
+              onJump={(a) => narrator.seek(resolveAnchorIndex(a))}
+              onOpenSettings={() => setSettingsOpen(true)}
+            />
           </aside>
         )}
       </div>
+
+      {/* Mobile: editorial panel as a slide-in drawer. */}
+      {panelOpen && !readerMode && (
+        <div className="fixed inset-0 z-40 lg:hidden">
+          <div
+            className="absolute inset-0 bg-black/60"
+            onClick={() => setPanelOpen(false)}
+          />
+          <div className="absolute inset-y-0 right-0 flex w-[88%] max-w-sm flex-col bg-ink-900 shadow-2xl">
+            <div className="flex items-center justify-between border-b border-ink-800 px-4 py-2">
+              <span className="text-sm font-semibold text-ink-200">
+                Notes &amp; tools
+              </span>
+              <button
+                className="btn-icon h-8 w-8"
+                onClick={() => setPanelOpen(false)}
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+            <div className="min-h-0 flex-1">
+              <SidePanel
+                projectId={projectId}
+                tab={tab}
+                setTab={setTab}
+                current={flatCurrent}
+                onJump={(a) => {
+                  narrator.seek(resolveAnchorIndex(a));
+                  setPanelOpen(false);
+                }}
+                onOpenSettings={() => setSettingsOpen(true)}
+              />
+            </div>
+          </div>
+        </div>
+      )}
 
       <PlaybackBar
         playing={playing}

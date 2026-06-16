@@ -91,7 +91,7 @@ export default function SettingsModal({ onClose }: { onClose: () => void }) {
             />
           </label>
           <div className="text-xs text-ink-400">Driving confidence</div>
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
             {CONFIDENCE.map((c) => (
               <button
                 key={c.value}

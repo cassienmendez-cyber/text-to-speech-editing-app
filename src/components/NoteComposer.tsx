@@ -93,7 +93,7 @@ export default function NoteComposer({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
-      <div className="card w-full max-w-lg space-y-4 border-ink-700">
+      <div className="card max-h-[90vh] w-full max-w-lg space-y-4 overflow-y-auto border-ink-700">
         <div className="flex items-center justify-between">
           <h3 className="text-lg font-semibold text-ink-50">New revision note</h3>
           <span className="chip capitalize">{anchor.level}</span>
@@ -130,7 +130,7 @@ export default function NoteComposer({
           onChange={(e) => setText(e.target.value)}
         />
 
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <label className="text-xs text-ink-400">
             Category
             <select
