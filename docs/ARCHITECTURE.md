@@ -65,6 +65,11 @@ implementation.
 - **Revision** — An accepted change record: original text, revised text, date
   accepted, source of change, and associated note. Restorable.
 - **Category** — Built-in or custom classification for notes.
+- **CharacterProfile / WorldElement** — The story bible. Character profiles
+  (physical, personality, relationships, fears, motivations, background) and
+  worldbuilding rules (by category: magic system, timeline, creatures, social
+  structure, …). The AI assistant references these during analysis and
+  continuity checks.
 
 ---
 
@@ -84,9 +89,14 @@ implementation.
 - **AI assistant** (`src/lib/ai.ts`) — Calls the Claude API (`claude-opus-4-8`)
   via `@anthropic-ai/sdk` with the author's own key, directly from the browser
   and only when explicitly enabled. Provides SUGGEST (rewrite), ANALYZE
-  (developmental insight, adaptive thinking), and pattern recognition. Every
-  rewrite requires explicit approval before it touches the manuscript; accepted
-  changes are recorded as restorable `Revision` entries.
+  (developmental insight, adaptive thinking), pattern recognition, and
+  continuity checking against the story bible (`src/lib/bible.ts` assembles the
+  character/world context). Every rewrite requires explicit approval before it
+  touches the manuscript; accepted changes are recorded as restorable
+  `Revision` entries.
+- **Story bible** (`src/components/StoryBible.tsx`) — CRUD for character
+  profiles and worldbuilding elements, persisted per project; surfaced to the
+  AI assistant as reference context.
 - **Desktop shell** (`src-tauri/`) — A Tauri wrapper that loads the same React
   frontend (`frontendDist: ../dist`) as a local-first native app. Building it
   requires the Tauri/WebKitGTK system prerequisites.

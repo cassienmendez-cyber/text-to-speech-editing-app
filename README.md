@@ -146,6 +146,14 @@ Icons are generated with `npm run icons` (re-run if you change the artwork).
   surfaced for accept / reject / edit, and accepted changes are tracked in
   restorable revision history.
 
+**Phase 3 — editorial intelligence (partial)**
+
+- **Story Bible** — a Character database (name, role, physical, personality,
+  relationships, fears, motivations, background) and a Worldbuilding database
+  (magic systems, timelines, creatures, social structures, …). The AI assistant
+  references these profiles during analysis, and a **Continuity check** flags
+  contradictions between a passage and your established characters/world rules.
+
 **Desktop**
 
 - A **Tauri** shell (`src-tauri/`) wraps the exact same React frontend as a

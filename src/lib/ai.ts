@@ -71,11 +71,19 @@ export async function suggestRewrite(
   return textOf(msg);
 }
 
+function bibleBlock(bible?: string): string {
+  return bible && bible.trim()
+    ? `\n\nStory bible (characters and world rules to stay consistent with):\n${bible}\n`
+    : "";
+}
+
 export interface AnalyzeInput {
   apiKey: string;
   title: string;
   passageText: string;
   notes: Note[];
+  /** Optional story-bible context (characters + world rules). */
+  bible?: string;
 }
 
 /** ANALYZE mode: developmental insights for a section. Returns a readable
@@ -99,8 +107,9 @@ export async function analyzePassage(
         content:
           `Chapter: ${input.title}\n\n` +
           `Passage:\n"""\n${input.passageText}\n"""\n\n` +
-          `Author's notes on this section:\n${notesBlock(input.notes)}\n\n` +
-          `Give a focused developmental analysis of this passage.`,
+          `Author's notes on this section:\n${notesBlock(input.notes)}` +
+          bibleBlock(input.bible) +
+          `\nGive a focused developmental analysis of this passage.`,
       },
     ],
   });
@@ -135,6 +144,42 @@ export async function analyzePatterns(
       {
         role: "user",
         content: `Here are the author's revision notes:\n${summary}\n\nWhat patterns and priorities do you see?`,
+      },
+    ],
+  });
+  return textOf(msg);
+}
+
+export interface ContinuityInput {
+  apiKey: string;
+  passageText: string;
+  bible: string;
+}
+
+/** Flags potential continuity issues between a passage and the story bible
+ *  (character profiles and world rules). Does not rewrite. */
+export async function continuityCheck(
+  input: ContinuityInput,
+): Promise<string> {
+  const msg = await client(input.apiKey).messages.create({
+    model: MODEL,
+    max_tokens: 4000,
+    thinking: { type: "adaptive" },
+    system:
+      VOICE_GUARD +
+      " In this mode you check for CONTINUITY problems only. Compare the " +
+      "passage against the story bible and flag contradictions in character " +
+      "details, relationships, motivations, world rules, timelines, or " +
+      "established facts. Do not rewrite. List each issue with the specific " +
+      "conflicting detail and where it clashes with the bible. If you find no " +
+      "issues, say so plainly. Use a short markdown list.",
+    messages: [
+      {
+        role: "user",
+        content:
+          `Story bible:\n${input.bible}\n\n` +
+          `Passage to check:\n"""\n${input.passageText}\n"""\n\n` +
+          `Flag any continuity issues.`,
       },
     ],
   });

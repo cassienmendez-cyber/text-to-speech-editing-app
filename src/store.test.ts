@@ -109,4 +109,59 @@ describe("store", () => {
     useStore.getState().setSetting("aiMode", "suggest");
     expect(useStore.getState().settings.aiMode).toBe("suggest");
   });
+
+  it("seeds empty story-bible arrays", () => {
+    const id = freshProject();
+    const p = useStore.getState().projects[id];
+    expect(p.characters).toEqual([]);
+    expect(p.world).toEqual([]);
+  });
+
+  it("characters: add, update, delete", () => {
+    const id = freshProject();
+    const now = Date.now();
+    useStore.getState().addCharacter(id, {
+      id: "c1",
+      name: "Mara",
+      role: "Keeper",
+      physical: "",
+      personality: "",
+      relationships: "",
+      fears: "",
+      motivations: "",
+      background: "",
+      createdAt: now,
+      updatedAt: now,
+    });
+    expect(useStore.getState().projects[id].characters).toHaveLength(1);
+
+    useStore.getState().updateCharacter(id, "c1", { fears: "the dark" });
+    expect(useStore.getState().projects[id].characters[0].fears).toBe(
+      "the dark",
+    );
+
+    useStore.getState().deleteCharacter(id, "c1");
+    expect(useStore.getState().projects[id].characters).toHaveLength(0);
+  });
+
+  it("world elements: add, update, delete", () => {
+    const id = freshProject();
+    const now = Date.now();
+    useStore.getState().addWorldElement(id, {
+      id: "w1",
+      name: "The Light",
+      category: "Magic System",
+      rules: "Never goes out.",
+      notes: "",
+      createdAt: now,
+      updatedAt: now,
+    });
+    expect(useStore.getState().projects[id].world).toHaveLength(1);
+
+    useStore.getState().updateWorldElement(id, "w1", { category: "Creatures" });
+    expect(useStore.getState().projects[id].world[0].category).toBe("Creatures");
+
+    useStore.getState().deleteWorldElement(id, "w1");
+    expect(useStore.getState().projects[id].world).toHaveLength(0);
+  });
 });

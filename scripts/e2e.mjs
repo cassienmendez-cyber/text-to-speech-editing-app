@@ -98,6 +98,19 @@ try {
     await waitText(page, "Tighten this opening paragraph");
   });
 
+  await step("add a character in the Story Bible", async () => {
+    await page.click('button[title="Story Bible — characters & worldbuilding"]');
+    await waitText(page, "Story Bible");
+    await clickText(page, "Add character");
+    await page.waitForSelector('input.field', { timeout: 5000 });
+    await page.type("input.field", "Mara");
+    await clickText(page, "Save");
+    await waitText(page, "Mara");
+    // Close the bible overlay.
+    await page.click('button[title="Close"]');
+    await page.waitForSelector(".sentence", { timeout: 5000 });
+  });
+
   await step("enter and exit Drive Mode", async () => {
     await page.click('button[title="Hands-free review for the car"]');
     await waitText(page, "Drive Mode");

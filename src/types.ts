@@ -111,12 +111,51 @@ export interface Revision {
   applied: boolean;
 }
 
+/** A character profile in the story bible. AI may reference these. */
+export interface CharacterProfile {
+  id: string;
+  name: string;
+  /** Role or one-line summary (e.g. "Protagonist", "Antagonist's sister"). */
+  role: string;
+  physical: string;
+  personality: string;
+  relationships: string;
+  fears: string;
+  motivations: string;
+  background: string;
+  createdAt: number;
+  updatedAt: number;
+}
+
+export type WorldCategory =
+  | "Magic System"
+  | "History / Timeline"
+  | "Creatures"
+  | "Social Structure"
+  | "Geography"
+  | "Technology"
+  | "Other";
+
+/** A worldbuilding rule/element. AI can flag continuity issues against these. */
+export interface WorldElement {
+  id: string;
+  name: string;
+  category: WorldCategory;
+  /** The rules / facts that must stay consistent. */
+  rules: string;
+  notes: string;
+  createdAt: number;
+  updatedAt: number;
+}
+
 export interface Project {
   manuscript: Manuscript;
   notes: Note[];
   bookmarks: Bookmark[];
   passes: RevisionPass[];
   revisions: Revision[];
+  characters: CharacterProfile[];
+  world: WorldElement[];
   /** Persisted listening position: index into the flattened sentence list. */
   playbackIndex: number;
   /** Author-selected narration settings. */

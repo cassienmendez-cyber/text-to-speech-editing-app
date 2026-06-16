@@ -4,12 +4,14 @@ import { nanoid } from "nanoid";
 import { splitSentences } from "./lib/parse";
 import type {
   Bookmark,
+  CharacterProfile,
   Manuscript,
   Note,
   Project,
   Revision,
   RevisionPass,
   Settings,
+  WorldElement,
 } from "./types";
 
 const DEFAULT_SETTINGS: Settings = {
@@ -31,6 +33,22 @@ interface AppState {
   removeProject: (id: string) => void;
   setCurrent: (id: string | null) => void;
   current: () => Project | null;
+
+  // Story bible — characters & worldbuilding
+  addCharacter: (projectId: string, character: CharacterProfile) => void;
+  updateCharacter: (
+    projectId: string,
+    characterId: string,
+    patch: Partial<CharacterProfile>,
+  ) => void;
+  deleteCharacter: (projectId: string, characterId: string) => void;
+  addWorldElement: (projectId: string, element: WorldElement) => void;
+  updateWorldElement: (
+    projectId: string,
+    elementId: string,
+    patch: Partial<WorldElement>,
+  ) => void;
+  deleteWorldElement: (projectId: string, elementId: string) => void;
 
   // Revisions (AI-assisted or manual edits to the manuscript)
   addRevision: (projectId: string, revision: Revision) => void;
@@ -89,6 +107,8 @@ export const useStore = create<AppState>()(
             { id: nanoid(8), name: "First Draft Cleanup", createdAt: Date.now() },
           ],
           revisions: [],
+          characters: [],
+          world: [],
           playbackIndex: 0,
           rate: 1,
         };
@@ -115,6 +135,98 @@ export const useStore = create<AppState>()(
         const { projects, currentId } = get();
         return currentId ? projects[currentId] ?? null : null;
       },
+
+      addCharacter: (projectId, character) =>
+        set((s) => {
+          const p = s.projects[projectId];
+          if (!p) return s;
+          return {
+            projects: {
+              ...s.projects,
+              [projectId]: { ...p, characters: [...p.characters, character] },
+            },
+          };
+        }),
+
+      updateCharacter: (projectId, characterId, patch) =>
+        set((s) => {
+          const p = s.projects[projectId];
+          if (!p) return s;
+          return {
+            projects: {
+              ...s.projects,
+              [projectId]: {
+                ...p,
+                characters: p.characters.map((c) =>
+                  c.id === characterId
+                    ? { ...c, ...patch, updatedAt: Date.now() }
+                    : c,
+                ),
+              },
+            },
+          };
+        }),
+
+      deleteCharacter: (projectId, characterId) =>
+        set((s) => {
+          const p = s.projects[projectId];
+          if (!p) return s;
+          return {
+            projects: {
+              ...s.projects,
+              [projectId]: {
+                ...p,
+                characters: p.characters.filter((c) => c.id !== characterId),
+              },
+            },
+          };
+        }),
+
+      addWorldElement: (projectId, element) =>
+        set((s) => {
+          const p = s.projects[projectId];
+          if (!p) return s;
+          return {
+            projects: {
+              ...s.projects,
+              [projectId]: { ...p, world: [...p.world, element] },
+            },
+          };
+        }),
+
+      updateWorldElement: (projectId, elementId, patch) =>
+        set((s) => {
+          const p = s.projects[projectId];
+          if (!p) return s;
+          return {
+            projects: {
+              ...s.projects,
+              [projectId]: {
+                ...p,
+                world: p.world.map((w) =>
+                  w.id === elementId
+                    ? { ...w, ...patch, updatedAt: Date.now() }
+                    : w,
+                ),
+              },
+            },
+          };
+        }),
+
+      deleteWorldElement: (projectId, elementId) =>
+        set((s) => {
+          const p = s.projects[projectId];
+          if (!p) return s;
+          return {
+            projects: {
+              ...s.projects,
+              [projectId]: {
+                ...p,
+                world: p.world.filter((w) => w.id !== elementId),
+              },
+            },
+          };
+        }),
 
       addRevision: (projectId, revision) =>
         set((s) => {
@@ -319,16 +431,23 @@ export const useStore = create<AppState>()(
     }),
     {
       name: "storyscribe-v1",
-      version: 2,
+      version: 3,
       migrate: (persisted: any, version) => {
         if (!persisted) return persisted;
+        const projects = persisted.projects ?? {};
         if (version < 2) {
           // Ensure every project has a revisions array and settings exist.
-          const projects = persisted.projects ?? {};
           for (const id of Object.keys(projects)) {
             if (!projects[id].revisions) projects[id].revisions = [];
           }
           persisted.settings = { ...DEFAULT_SETTINGS, ...persisted.settings };
+        }
+        if (version < 3) {
+          // Story bible: characters & worldbuilding.
+          for (const id of Object.keys(projects)) {
+            if (!projects[id].characters) projects[id].characters = [];
+            if (!projects[id].world) projects[id].world = [];
+          }
         }
         return persisted;
       },

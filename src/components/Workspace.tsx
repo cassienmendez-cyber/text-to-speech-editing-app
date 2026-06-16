@@ -9,8 +9,17 @@ import PlaybackBar from "./PlaybackBar";
 import NoteComposer from "./NoteComposer";
 import DriveMode from "./DriveMode";
 import SettingsModal from "./SettingsModal";
+import StoryBible from "./StoryBible";
 import SidePanel, { type Tab } from "./SidePanel";
-import { ArrowLeft, Eye, Car, Settings as SettingsIcon, Edit, X } from "./icons";
+import {
+  ArrowLeft,
+  Eye,
+  Car,
+  Settings as SettingsIcon,
+  Edit,
+  X,
+  Book,
+} from "./icons";
 
 export default function Workspace({ projectId }: { projectId: string }) {
   const project = useStore((s) => s.projects[projectId]);
@@ -36,6 +45,7 @@ export default function Workspace({ projectId }: { projectId: string }) {
   const [composerOpen, setComposerOpen] = useState(false);
   const [driveOpen, setDriveOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [bibleOpen, setBibleOpen] = useState(false);
   // Mobile-only: the editorial panel opens as a slide-in drawer.
   const [panelOpen, setPanelOpen] = useState(false);
 
@@ -156,6 +166,14 @@ export default function Workspace({ projectId }: { projectId: string }) {
           <span className="hidden md:inline">
             {readerMode ? "Reader mode: on" : "Read like a reader"}
           </span>
+        </button>
+        <button
+          className="btn-ghost shrink-0"
+          onClick={() => setBibleOpen(true)}
+          title="Story Bible — characters & worldbuilding"
+        >
+          <Book />
+          <span className="hidden md:inline">Story Bible</span>
         </button>
         <button
           className="btn-ghost shrink-0"
@@ -293,6 +311,10 @@ export default function Workspace({ projectId }: { projectId: string }) {
       )}
 
       {settingsOpen && <SettingsModal onClose={() => setSettingsOpen(false)} />}
+
+      {bibleOpen && (
+        <StoryBible projectId={projectId} onClose={() => setBibleOpen(false)} />
+      )}
     </div>
   );
 }

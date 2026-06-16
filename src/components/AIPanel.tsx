@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { nanoid } from "nanoid";
 import { useStore } from "../store";
+import { buildBibleContext } from "../lib/bible";
 import type { FlatSentence, Revision } from "../types";
 import { Sparkles, Check, Settings as SettingsIcon } from "./icons";
 
@@ -39,6 +40,7 @@ export default function AIPanel({ projectId, current, onOpenSettings }: Props) {
   const passageNotes = paragraph
     ? project.notes.filter((n) => n.anchor.paragraphId === paragraph.id)
     : [];
+  const bible = buildBibleContext(project);
 
   async function run(action: (ai: AIModule) => Promise<void>) {
     setError(null);
@@ -80,6 +82,20 @@ export default function AIPanel({ projectId, current, onOpenSettings }: Props) {
         title: current?.chapter.title ?? "Passage",
         passageText,
         notes: passageNotes,
+        bible,
+      });
+      setAnalysis(text);
+    });
+  }
+
+  function doContinuity() {
+    setDraft(null);
+    setAnalysis(null);
+    run(async (ai) => {
+      const text = await ai.continuityCheck({
+        apiKey: settings.apiKey,
+        passageText,
+        bible,
       });
       setAnalysis(text);
     });
@@ -157,7 +173,24 @@ export default function AIPanel({ projectId, current, onOpenSettings }: Props) {
             <button className="btn-ghost" onClick={doPatterns} disabled={busy}>
               Note patterns
             </button>
+            {bible && (
+              <button
+                className="btn-ghost"
+                onClick={doContinuity}
+                disabled={busy || !paragraph}
+                title="Check this passage against your story bible"
+              >
+                Continuity check
+              </button>
+            )}
           </div>
+
+          {!bible && (
+            <p className="text-xs text-ink-500">
+              Tip: build your Story Bible (characters &amp; worldbuilding) so the
+              assistant can reference profiles and flag continuity issues.
+            </p>
+          )}
 
           {passageNotes.length > 0 && (
             <p className="text-xs text-ink-500">
