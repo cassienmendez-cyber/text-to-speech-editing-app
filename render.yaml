@@ -1,0 +1,14 @@
+# Render blueprint for the StoryScribe collaboration signaling server.
+# Deploy: render.com → New → Blueprint → pick this repo → Apply.
+# Render builds server/Dockerfile, gives a public https/wss URL, and injects
+# PORT automatically. Then set the app's VITE_SIGNALING repo variable to
+# wss://<the service URL> and re-run the GitHub Pages deploy.
+services:
+  - type: web
+    name: storyscribe-signaling
+    runtime: docker
+    rootDir: server
+    dockerfilePath: ./Dockerfile
+    plan: free
+    healthCheckPath: /
+    autoDeploy: true

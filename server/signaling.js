@@ -8,12 +8,20 @@
 // Run:   PORT=4444 node server/signaling.js
 // Deploy behind TLS (the platform terminates HTTPS) and point the app at it
 // with VITE_SIGNALING=wss://your-host
+import { createServer } from "node:http";
 import { WebSocketServer } from "ws";
 
 const port = Number(process.env.PORT) || 4444;
 const pingInterval = 30000;
 
-const wss = new WebSocketServer({ port });
+// A plain HTTP endpoint so platform health checks pass and the deployment is
+// verifiable in a browser. WebSocket upgrades are handled by the WS server.
+const httpServer = createServer((_req, res) => {
+  res.writeHead(200, { "content-type": "text/plain" });
+  res.end("StoryScribe signaling server OK");
+});
+
+const wss = new WebSocketServer({ server: httpServer });
 /** topic -> Set<WebSocket> */
 const topics = new Map();
 
@@ -99,4 +107,6 @@ const interval = setInterval(() => {
 }, pingInterval);
 wss.on("close", () => clearInterval(interval));
 
-console.log(`StoryScribe signaling server listening on :${port}`);
+httpServer.listen(port, () => {
+  console.log(`StoryScribe signaling server listening on :${port}`);
+});
