@@ -16,6 +16,7 @@ function makeNote(paragraphId: string, chapterId: string): Note {
   return {
     id: "n1",
     text: "Tighten this",
+    authorRole: "author",
     createdAt: Date.now(),
     category: "Pacing",
     tags: [],
@@ -105,6 +106,24 @@ describe("store", () => {
     expect(useStore.getState().projects[id].revisions[0].applied).toBe(false);
   });
 
+  it("moveNote relocates a note's anchor without deleting it", () => {
+    const id = freshProject();
+    const ch = useStore.getState().projects[id].manuscript.chapters[0];
+    const p0 = ch.paragraphs[0];
+    useStore.getState().addNote(id, makeNote(p0.id, ch.id));
+    const noteId = useStore.getState().projects[id].notes[0].id;
+    useStore.getState().moveNote(
+      id,
+      noteId,
+      { level: "sentence", chapterId: ch.id, paragraphId: "p-new", sentenceId: "s-new" },
+      "new context",
+    );
+    const moved = useStore.getState().projects[id].notes[0];
+    expect(moved.anchor.paragraphId).toBe("p-new");
+    expect(moved.contextText).toBe("new context");
+    expect(useStore.getState().projects[id].notes).toHaveLength(1);
+  });
+
   it("setSetting updates settings", () => {
     useStore.getState().setSetting("aiMode", "suggest");
     expect(useStore.getState().settings.aiMode).toBe("suggest");
@@ -123,6 +142,7 @@ describe("store", () => {
     useStore.getState().addCharacter(id, {
       id: "c1",
       name: "Mara",
+      aliases: "",
       role: "Keeper",
       physical: "",
       personality: "",

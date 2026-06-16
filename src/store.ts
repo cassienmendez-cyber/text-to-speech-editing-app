@@ -3,6 +3,7 @@ import { persist } from "zustand/middleware";
 import { nanoid } from "nanoid";
 import { splitSentences } from "./lib/parse";
 import type {
+  Anchor,
   Bookmark,
   CharacterProfile,
   Manuscript,
@@ -19,6 +20,7 @@ const DEFAULT_SETTINGS: Settings = {
   aiMode: "off",
   drivingConfidence: "standard",
   wakePhrase: "hey storyscribe",
+  defaultRole: "author",
 };
 
 interface AppState {
@@ -69,6 +71,13 @@ interface AppState {
   addNote: (projectId: string, note: Note) => void;
   updateNote: (projectId: string, noteId: string, patch: Partial<Note>) => void;
   deleteNote: (projectId: string, noteId: string) => void;
+  /** Relocate a note to a new manuscript anchor without deleting it. */
+  moveNote: (
+    projectId: string,
+    noteId: string,
+    anchor: Anchor,
+    contextText: string,
+  ) => void;
 
   // Bookmarks
   addBookmark: (projectId: string, bookmark: Bookmark) => void;
@@ -336,6 +345,23 @@ export const useStore = create<AppState>()(
           };
         }),
 
+      moveNote: (projectId, noteId, anchor, contextText) =>
+        set((s) => {
+          const p = s.projects[projectId];
+          if (!p) return s;
+          return {
+            projects: {
+              ...s.projects,
+              [projectId]: {
+                ...p,
+                notes: p.notes.map((n) =>
+                  n.id === noteId ? { ...n, anchor, contextText } : n,
+                ),
+              },
+            },
+          };
+        }),
+
       addBookmark: (projectId, bookmark) =>
         set((s) => {
           const p = s.projects[projectId];
@@ -431,7 +457,7 @@ export const useStore = create<AppState>()(
     }),
     {
       name: "storyscribe-v1",
-      version: 3,
+      version: 4,
       migrate: (persisted: any, version) => {
         if (!persisted) return persisted;
         const projects = persisted.projects ?? {};
@@ -447,6 +473,18 @@ export const useStore = create<AppState>()(
           for (const id of Object.keys(projects)) {
             if (!projects[id].characters) projects[id].characters = [];
             if (!projects[id].world) projects[id].world = [];
+          }
+        }
+        if (version < 4) {
+          // Beta-reader roles on notes + character aliases.
+          persisted.settings = { ...DEFAULT_SETTINGS, ...persisted.settings };
+          for (const id of Object.keys(projects)) {
+            for (const n of projects[id].notes ?? []) {
+              if (!n.authorRole) n.authorRole = "author";
+            }
+            for (const c of projects[id].characters ?? []) {
+              if (c.aliases === undefined) c.aliases = "";
+            }
           }
         }
         return persisted;

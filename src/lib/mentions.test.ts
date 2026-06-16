@@ -65,6 +65,22 @@ describe("analyzeMentions", () => {
     expect(byEntity.get("c1")!.indices).toEqual([0]);
   });
 
+  it("matches character aliases as well as the primary name", () => {
+    const m = parseManuscript(
+      "Chapter 1\n\nMara waved. The keeper smiled back.",
+      "T",
+      "txt",
+    );
+    const f = flattenSentences(m);
+    const entities = buildEntities({
+      characters: [{ id: "c1", name: "Mara", aliases: "the keeper, M" }],
+      world: [],
+    });
+    const { byEntity } = analyzeMentions(f, entities);
+    // Both "Mara" (sentence 0) and "the keeper" (sentence 1) link to c1.
+    expect(byEntity.get("c1")!.indices).toEqual([0, 1]);
+  });
+
   it("returns empty analysis when there are no entities", () => {
     const { byEntity, segmentsBySentenceId } = analyzeMentions(flat, []);
     expect(byEntity.size).toBe(0);

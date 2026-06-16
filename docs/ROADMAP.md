@@ -3,6 +3,13 @@
 StoryScribe is delivered in three phases. Each phase builds on the previous one
 while preserving the core principle of complete author control.
 
+> **Status:** All three phases are implemented in the current app — capture
+> (Phase 1), revision intelligence including batch assistance (Phase 2), and
+> editorial intelligence including the character/worldbuilding databases,
+> continuity checking, bible↔manuscript linking, and beta-reader roles
+> (Phase 3). Remaining future items: EPUB/PDF import and custom note
+> categories. See the README's "Implemented" section for specifics.
+
 ---
 
 ## Phase 1 — MVP

@@ -31,13 +31,22 @@ export interface MentionAnalysis {
 }
 
 export function buildEntities(project: {
-  characters: { id: string; name: string }[];
+  characters: { id: string; name: string; aliases?: string }[];
   world: { id: string; name: string }[];
 }): Entity[] {
   const ents: Entity[] = [];
   for (const c of project.characters) {
-    if (c.name.trim())
-      ents.push({ id: c.id, kind: "character", name: c.name, names: [c.name] });
+    if (!c.name.trim()) continue;
+    const aliases = (c.aliases ?? "")
+      .split(/[,\n]/)
+      .map((a) => a.trim())
+      .filter(Boolean);
+    ents.push({
+      id: c.id,
+      kind: "character",
+      name: c.name,
+      names: [c.name, ...aliases],
+    });
   }
   for (const w of project.world) {
     if (w.name.trim())

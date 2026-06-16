@@ -126,7 +126,10 @@ Icons are generated with `npm run icons` (re-run if you change the artwork).
 - Voice + text revision notes with preserved audio, categories, emotional tags,
   and surrounding context
 - Sentence-level note anchoring with "go to location"
-- Google-Docs-style comment system: edit, resolve/reopen, delete, replay audio
+- Google-Docs-style comment system: edit, resolve/reopen, delete, replay audio,
+  reassign category, and relocate ("move") a note to a new location
+- Author / Editor / Beta-Reader roles on notes (filterable) so collaborator
+  feedback stays distinguishable
 - Bookmarks (independently searchable)
 - Revision passes and a revision dashboard (category distribution, reaction
   trends, resolution stats)
@@ -153,9 +156,11 @@ Icons are generated with `npm run icons` (re-run if you change the artwork).
   (magic systems, timelines, creatures, social structures, …). The AI assistant
   references these profiles during analysis, and a **Continuity check** flags
   contradictions between a passage and your established characters/world rules.
-- **Bible ↔ manuscript linking** — recognized character/world names are
-  highlighted in the reader and click through to their profile; each profile
-  lists every place it's mentioned with jump-to-location.
+- **Bible ↔ manuscript linking** — recognized character/world names (including
+  aliases/nicknames) are highlighted in the reader and click through to their
+  profile; each profile lists every place it's mentioned with jump-to-location.
+- **Beta-reader collaboration** — notes carry an Author / Editor / Beta-Reader
+  role (filterable), keeping multi-collaborator feedback distinguishable.
 
 **Desktop**
 
@@ -186,7 +191,10 @@ The AI assistant is **opt-in**. Open **Settings** (gear icon), choose an AI mode
 (Suggest / Analyze / Collaborate), and paste your Anthropic API key. The key is
 stored locally on your device and is sent only to the Anthropic API, and only
 when you run an AI action. Leave AI **Off** to keep everything fully local. The
-assistant uses the `claude-opus-4-8` model via `@anthropic-ai/sdk`.
+assistant uses the `claude-opus-4-8` model via `@anthropic-ai/sdk`. Beyond
+per-passage Suggest/Analyze, it offers **batch revision assistance** (triage all
+unresolved notes of a category, or every note in the current chapter) and a
+**continuity check** against the story bible.
 
 ## Project Structure
 

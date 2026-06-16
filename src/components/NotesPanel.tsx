@@ -1,19 +1,35 @@
 import { useMemo, useState } from "react";
 import { useStore, DEFAULT_CATEGORIES } from "../store";
-import type { Anchor, Note } from "../types";
+import type { Anchor, AuthorRole, FlatSentence, Note } from "../types";
 import { Check, Trash, Edit } from "./icons";
 
 interface Props {
   projectId: string;
   onJump: (anchor: Anchor) => void;
+  /** Current playback location, used for "move note here". */
+  current?: FlatSentence;
 }
 
-export default function NotesPanel({ projectId, onJump }: Props) {
+const ROLE_LABEL: Record<AuthorRole, string> = {
+  author: "Author",
+  editor: "Editor",
+  beta: "Beta Reader",
+};
+
+const ROLE_CLASS: Record<AuthorRole, string> = {
+  author: "border-accent-500/40 text-accent-400",
+  editor: "border-sky-500/40 text-sky-300",
+  beta: "border-emerald-500/40 text-emerald-300",
+};
+
+export default function NotesPanel({ projectId, onJump, current }: Props) {
   const project = useStore((s) => s.projects[projectId]);
   const updateNote = useStore((s) => s.updateNote);
   const deleteNote = useStore((s) => s.deleteNote);
+  const moveNote = useStore((s) => s.moveNote);
 
   const [categoryFilter, setCategoryFilter] = useState("");
+  const [roleFilter, setRoleFilter] = useState<"" | AuthorRole>("");
   const [showResolved, setShowResolved] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [draft, setDraft] = useState("");
@@ -27,8 +43,21 @@ export default function NotesPanel({ projectId, onJump }: Props) {
   const filtered = notes.filter((n) => {
     if (!showResolved && n.resolved) return false;
     if (categoryFilter && n.category !== categoryFilter) return false;
+    if (roleFilter && n.authorRole !== roleFilter) return false;
     return true;
   });
+
+  function moveHere(note: Note) {
+    if (!current) return;
+    const anchor: Anchor = {
+      level: "sentence",
+      chapterId: current.chapter.id,
+      paragraphId: current.paragraph.id,
+      sentenceId: current.sentence.id,
+    };
+    const context = current.paragraph.sentences.map((s) => s.text).join(" ");
+    moveNote(projectId, note.id, anchor, context);
+  }
 
   function startEdit(note: Note) {
     setEditingId(note.id);
@@ -53,6 +82,16 @@ export default function NotesPanel({ projectId, onJump }: Props) {
             <option key={c}>{c}</option>
           ))}
         </select>
+        <select
+          className="field w-auto py-1"
+          value={roleFilter}
+          onChange={(e) => setRoleFilter(e.target.value as "" | AuthorRole)}
+        >
+          <option value="">All authors</option>
+          <option value="author">Author</option>
+          <option value="editor">Editor</option>
+          <option value="beta">Beta Reader</option>
+        </select>
         <label className="flex items-center gap-1 text-xs text-ink-400">
           <input
             type="checkbox"
@@ -75,12 +114,28 @@ export default function NotesPanel({ projectId, onJump }: Props) {
             key={note.id}
             className={`card space-y-2 ${note.resolved ? "opacity-60" : ""}`}
           >
-            <div className="flex items-center justify-between gap-2">
-              <span className="chip border-accent-500/40 text-accent-400">
-                {note.category}
+            <div className="flex flex-wrap items-center gap-2">
+              <span className={`chip ${ROLE_CLASS[note.authorRole]}`}>
+                {ROLE_LABEL[note.authorRole]}
               </span>
-              <span className="text-[10px] text-ink-500">
-                {new Date(note.createdAt).toLocaleString()}
+              {/* Reassign category inline. */}
+              <select
+                className="rounded-full border border-ink-700 bg-ink-800 px-2 py-0.5 text-xs text-ink-200"
+                value={note.category}
+                onChange={(e) =>
+                  updateNote(projectId, note.id, { category: e.target.value })
+                }
+                title="Reassign category"
+              >
+                {DEFAULT_CATEGORIES.map((c) => (
+                  <option key={c}>{c}</option>
+                ))}
+                {!DEFAULT_CATEGORIES.includes(note.category) && (
+                  <option>{note.category}</option>
+                )}
+              </select>
+              <span className="ml-auto text-[10px] text-ink-500">
+                {new Date(note.createdAt).toLocaleDateString()}
               </span>
             </div>
 
@@ -147,6 +202,15 @@ export default function NotesPanel({ projectId, onJump }: Props) {
               >
                 Go to location
               </button>
+              {current && (
+                <button
+                  className="rounded px-2 py-1 text-ink-300 hover:bg-ink-800"
+                  onClick={() => moveHere(note)}
+                  title="Relocate this note to the current playback location"
+                >
+                  Move here
+                </button>
+              )}
               <button
                 className="rounded px-2 py-1 text-ink-300 hover:bg-ink-800"
                 onClick={() =>

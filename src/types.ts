@@ -62,9 +62,14 @@ export type EmotionalTag =
   | "Confusing"
   | string;
 
+/** Who authored a note — keeps author/editor/beta-reader feedback distinct. */
+export type AuthorRole = "author" | "editor" | "beta";
+
 export interface Note {
   id: string;
   text: string;
+  /** Author / Editor / Beta Reader — defaults to "author". */
+  authorRole: AuthorRole;
   /** Object URL / data URL for the preserved original voice recording. */
   audioUrl?: string;
   createdAt: number;
@@ -115,6 +120,8 @@ export interface Revision {
 export interface CharacterProfile {
   id: string;
   name: string;
+  /** Comma/newline-separated nicknames or alternate names (also matched). */
+  aliases: string;
   /** Role or one-line summary (e.g. "Protagonist", "Antagonist's sister"). */
   role: string;
   physical: string;
@@ -175,6 +182,8 @@ export interface Settings {
   aiMode: AIMode;
   drivingConfidence: DrivingConfidence;
   wakePhrase: string;
+  /** Default role applied to new notes (author / editor / beta reader). */
+  defaultRole: AuthorRole;
 }
 
 /** A flattened, ordered reference to a sentence and its location. */

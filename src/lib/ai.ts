@@ -150,6 +150,53 @@ export async function analyzePatterns(
   return textOf(msg);
 }
 
+export interface BatchItem {
+  category: string;
+  noteText: string;
+  context: string;
+}
+
+export interface BatchInput {
+  apiKey: string;
+  scopeLabel: string;
+  items: BatchItem[];
+  bible?: string;
+}
+
+/** Batch revision assistance: triage a set of related notes (e.g. all pacing
+ *  notes, or every unresolved note in a chapter) into prioritized, optional
+ *  guidance. Advisory only — it never edits the manuscript. */
+export async function analyzeBatch(input: BatchInput): Promise<string> {
+  const list = input.items
+    .map(
+      (it, i) =>
+        `${i + 1}. [${it.category}] Note: ${it.noteText || "(voice note)"}\n   Passage: "${it.context}"`,
+    )
+    .join("\n\n");
+  const msg = await client(input.apiKey).messages.create({
+    model: MODEL,
+    max_tokens: 4000,
+    thinking: { type: "adaptive" },
+    system:
+      VOICE_GUARD +
+      " In BATCH mode you triage a set of related revision notes. Provide " +
+      "prioritized, actionable guidance addressing them as a group: cluster " +
+      "similar issues, surface the highest-impact fixes first, and keep the " +
+      "author's voice. Give specific optional suggestions per note where " +
+      "useful; do not rewrite the whole manuscript. Use short markdown sections.",
+    messages: [
+      {
+        role: "user",
+        content:
+          `Scope: ${input.scopeLabel}\n\nNotes to address:\n${list}` +
+          bibleBlock(input.bible) +
+          `\nProvide prioritized batch revision guidance.`,
+      },
+    ],
+  });
+  return textOf(msg);
+}
+
 export interface ContinuityInput {
   apiKey: string;
   passageText: string;

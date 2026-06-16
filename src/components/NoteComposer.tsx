@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { nanoid } from "nanoid";
 import { useStore, DEFAULT_CATEGORIES, EMOTIONAL_TAGS } from "../store";
 import { VoiceCapture, recordingSupported, sttSupported } from "../lib/speech";
-import type { Anchor, Note } from "../types";
+import type { Anchor, AuthorRole, Note } from "../types";
 import { Mic, Check } from "./icons";
 
 interface Props {
@@ -22,8 +22,10 @@ export default function NoteComposer({
 }: Props) {
   const addNote = useStore((s) => s.addNote);
   const passes = useStore((s) => s.projects[projectId]?.passes ?? []);
+  const defaultRole = useStore((s) => s.settings.defaultRole);
 
   const [text, setText] = useState("");
+  const [authorRole, setAuthorRole] = useState<AuthorRole>(defaultRole);
   const [category, setCategory] = useState<string>("Line Edit");
   const [tags, setTags] = useState<string[]>([]);
   const [passIds, setPassIds] = useState<string[]>([]);
@@ -75,6 +77,7 @@ export default function NoteComposer({
     const note: Note = {
       id: nanoid(10),
       text: text.trim(),
+      authorRole,
       audioUrl: audioUrlRef.current,
       createdAt: Date.now(),
       category,
@@ -141,6 +144,18 @@ export default function NoteComposer({
               {DEFAULT_CATEGORIES.map((c) => (
                 <option key={c}>{c}</option>
               ))}
+            </select>
+          </label>
+          <label className="text-xs text-ink-400">
+            As
+            <select
+              className="field mt-1"
+              value={authorRole}
+              onChange={(e) => setAuthorRole(e.target.value as AuthorRole)}
+            >
+              <option value="author">Author</option>
+              <option value="editor">Editor</option>
+              <option value="beta">Beta Reader</option>
             </select>
           </label>
           <div className="text-xs text-ink-400">

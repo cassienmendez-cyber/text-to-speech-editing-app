@@ -54,7 +54,9 @@ export default function SidePanel({
         ))}
       </div>
       <div className="min-h-0 flex-1">
-        {tab === "notes" && <NotesPanel projectId={projectId} onJump={onJump} />}
+        {tab === "notes" && (
+          <NotesPanel projectId={projectId} onJump={onJump} current={current} />
+        )}
         {tab === "bookmarks" && (
           <BookmarksPanel projectId={projectId} onJump={onJump} />
         )}

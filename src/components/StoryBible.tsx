@@ -38,6 +38,7 @@ function emptyCharacter(): CharacterProfile {
   return {
     id: nanoid(10),
     name: "",
+    aliases: "",
     role: "",
     physical: "",
     personality: "",
@@ -348,6 +349,11 @@ function CharacterEditor({
   return (
     <div className="mx-auto w-full max-w-2xl flex-1 space-y-3 overflow-y-auto px-4 py-4">
       <Field label="Name" value={c.name} onChange={set("name")} />
+      <Field
+        label="Aliases / nicknames (comma-separated — also linked in the text)"
+        value={c.aliases}
+        onChange={set("aliases")}
+      />
       <Field label="Role / summary" value={c.role} onChange={set("role")} />
       <Field label="Physical description" value={c.physical} onChange={set("physical")} textarea />
       <Field label="Personality" value={c.personality} onChange={set("personality")} textarea />

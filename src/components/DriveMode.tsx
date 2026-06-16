@@ -93,6 +93,7 @@ export default function DriveMode({
     const note: Note = {
       id: nanoid(10),
       text: text.trim(),
+      authorRole: settings.defaultRole,
       audioUrl: audioUrlRef.current,
       createdAt: Date.now(),
       category,

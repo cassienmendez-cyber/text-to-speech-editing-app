@@ -98,6 +98,21 @@ try {
     await waitText(page, "Tighten this opening paragraph");
   });
 
+  await step("note role chip + relocate", async () => {
+    await clickText(page, "Notes");
+    // The new note is tagged with an author role (default: Author).
+    await page.waitForFunction(() =>
+      [...document.querySelectorAll(".chip")].some(
+        (c) => c.textContent.trim() === "Author",
+      ),
+    );
+    // Relocate it to the current playback location (non-destructive).
+    await clickText(page, "Move here");
+    await page.waitForFunction(() =>
+      document.body.textContent.includes("Tighten this opening paragraph"),
+    );
+  });
+
   await step("add a character in the Story Bible", async () => {
     await page.click('button[title="Story Bible — characters & worldbuilding"]');
     await waitText(page, "Story Bible");

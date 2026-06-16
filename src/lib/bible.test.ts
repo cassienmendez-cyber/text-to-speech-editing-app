@@ -5,6 +5,7 @@ import type { CharacterProfile, WorldElement } from "../types";
 const char = (over: Partial<CharacterProfile>): CharacterProfile => ({
   id: "c",
   name: "",
+  aliases: "",
   role: "",
   physical: "",
   personality: "",

@@ -27,6 +27,7 @@ export default function AIPanel({ projectId, current, onOpenSettings }: Props) {
   const [draft, setDraft] = useState<string | null>(null);
   // A read-only analysis result.
   const [analysis, setAnalysis] = useState<string | null>(null);
+  const [batchScope, setBatchScope] = useState("__chapter__");
 
   if (!project) return null;
 
@@ -41,6 +42,8 @@ export default function AIPanel({ projectId, current, onOpenSettings }: Props) {
     ? project.notes.filter((n) => n.anchor.paragraphId === paragraph.id)
     : [];
   const bible = buildBibleContext(project);
+  const unresolved = project.notes.filter((n) => !n.resolved);
+  const unresolvedCategories = [...new Set(unresolved.map((n) => n.category))];
 
   async function run(action: (ai: AIModule) => Promise<void>) {
     setError(null);
@@ -95,6 +98,37 @@ export default function AIPanel({ projectId, current, onOpenSettings }: Props) {
       const text = await ai.continuityCheck({
         apiKey: settings.apiKey,
         passageText,
+        bible,
+      });
+      setAnalysis(text);
+    });
+  }
+
+  function doBatch() {
+    setDraft(null);
+    setAnalysis(null);
+    const unresolved = project.notes.filter((n) => !n.resolved);
+    const inScope =
+      batchScope === "__chapter__"
+        ? unresolved.filter((n) => n.anchor.chapterId === current?.chapter.id)
+        : unresolved.filter((n) => n.category === batchScope);
+    if (inScope.length === 0) {
+      setError("No unresolved notes in that scope.");
+      return;
+    }
+    const scopeLabel =
+      batchScope === "__chapter__"
+        ? `Chapter: ${current?.chapter.title ?? ""}`
+        : `All unresolved ${batchScope} notes`;
+    run(async (ai) => {
+      const text = await ai.analyzeBatch({
+        apiKey: settings.apiKey,
+        scopeLabel,
+        items: inScope.map((n) => ({
+          category: n.category,
+          noteText: n.text,
+          context: n.contextText,
+        })),
         bible,
       });
       setAnalysis(text);
@@ -198,6 +232,35 @@ export default function AIPanel({ projectId, current, onOpenSettings }: Props) {
               {passageNotes.length === 1 ? "" : "s"} on this paragraph will be
               included.
             </p>
+          )}
+
+          {unresolved.length > 0 && (
+            <div className="rounded-lg border border-ink-800 p-2">
+              <div className="mb-1 text-xs font-semibold uppercase tracking-wide text-ink-400">
+                Batch revision assistance
+              </div>
+              <div className="flex flex-wrap items-center gap-2">
+                <select
+                  className="field w-auto flex-1 py-1"
+                  value={batchScope}
+                  onChange={(e) => setBatchScope(e.target.value)}
+                >
+                  <option value="__chapter__">This chapter</option>
+                  {unresolvedCategories.map((c) => (
+                    <option key={c} value={c}>
+                      All {c} notes
+                    </option>
+                  ))}
+                </select>
+                <button
+                  className="btn-ghost py-1"
+                  onClick={doBatch}
+                  disabled={busy}
+                >
+                  Generate
+                </button>
+              </div>
+            </div>
           )}
 
           {busy && (

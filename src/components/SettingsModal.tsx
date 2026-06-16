@@ -1,5 +1,5 @@
 import { useStore } from "../store";
-import type { AIMode, DrivingConfidence } from "../types";
+import type { AIMode, DrivingConfidence, Settings } from "../types";
 import { X } from "./icons";
 
 const AI_MODES: { value: AIMode; label: string; desc: string }[] = [
@@ -73,6 +73,30 @@ export default function SettingsModal({ onClose }: { onClose: () => void }) {
             Anthropic API, and only when AI is enabled. Manuscript text is shared
             with the API only when you run an AI action. Leave AI off to keep
             everything fully local.
+          </p>
+        </section>
+
+        <section className="space-y-2">
+          <h4 className="text-xs font-semibold uppercase tracking-wide text-ink-400">
+            Notes
+          </h4>
+          <label className="block text-xs text-ink-400">
+            I'm reviewing as
+            <select
+              className="field mt-1"
+              value={settings.defaultRole}
+              onChange={(e) =>
+                setSetting("defaultRole", e.target.value as Settings["defaultRole"])
+              }
+            >
+              <option value="author">Author</option>
+              <option value="editor">Editor</option>
+              <option value="beta">Beta Reader</option>
+            </select>
+          </label>
+          <p className="text-xs text-ink-500">
+            New notes are tagged with this role so author, editor, and
+            beta-reader feedback stay distinguishable.
           </p>
         </section>
 
