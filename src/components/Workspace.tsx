@@ -10,9 +10,19 @@ import NotesPanel from "./NotesPanel";
 import BookmarksPanel from "./BookmarksPanel";
 import Dashboard from "./Dashboard";
 import NoteComposer from "./NoteComposer";
-import { ArrowLeft, Eye } from "./icons";
+import AIPanel from "./AIPanel";
+import DriveMode from "./DriveMode";
+import SettingsModal from "./SettingsModal";
+import { ArrowLeft, Eye, Car, Settings as SettingsIcon } from "./icons";
 
-type Tab = "notes" | "bookmarks" | "dashboard";
+type Tab = "notes" | "bookmarks" | "dashboard" | "ai";
+
+const TABS: { id: Tab; label: string }[] = [
+  { id: "notes", label: "Notes" },
+  { id: "bookmarks", label: "Bookmarks" },
+  { id: "dashboard", label: "Dashboard" },
+  { id: "ai", label: "AI" },
+];
 
 export default function Workspace({ projectId }: { projectId: string }) {
   const project = useStore((s) => s.projects[projectId]);
@@ -32,6 +42,8 @@ export default function Workspace({ projectId }: { projectId: string }) {
   const [tab, setTab] = useState<Tab>("notes");
   const [readerMode, setReaderMode] = useState(false);
   const [composerOpen, setComposerOpen] = useState(false);
+  const [driveOpen, setDriveOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
   const narratorRef = useRef<Narrator | null>(null);
   if (!narratorRef.current) {
@@ -146,6 +158,23 @@ export default function Workspace({ projectId }: { projectId: string }) {
         >
           <Eye /> {readerMode ? "Reader mode: on" : "Read like a reader"}
         </button>
+        <button
+          className="btn-ghost"
+          onClick={() => {
+            narrator.pause();
+            setDriveOpen(true);
+          }}
+          title="Hands-free review for the car"
+        >
+          <Car /> Drive Mode
+        </button>
+        <button
+          className="btn-icon"
+          onClick={() => setSettingsOpen(true)}
+          title="Settings"
+        >
+          <SettingsIcon />
+        </button>
       </header>
 
       <div className="flex min-h-0 flex-1">
@@ -163,17 +192,17 @@ export default function Workspace({ projectId }: { projectId: string }) {
         {!readerMode && (
           <aside className="flex w-[22rem] shrink-0 flex-col border-l border-ink-800 bg-ink-900/40">
             <div className="flex border-b border-ink-800 text-sm">
-              {(["notes", "bookmarks", "dashboard"] as Tab[]).map((t) => (
+              {TABS.map((t) => (
                 <button
-                  key={t}
-                  className={`flex-1 py-2 capitalize ${
-                    tab === t
+                  key={t.id}
+                  className={`flex-1 py-2 ${
+                    tab === t.id
                       ? "border-b-2 border-accent-500 text-accent-400"
                       : "text-ink-400 hover:text-ink-200"
                   }`}
-                  onClick={() => setTab(t)}
+                  onClick={() => setTab(t.id)}
                 >
-                  {t}
+                  {t.label}
                 </button>
               ))}
             </div>
@@ -191,6 +220,13 @@ export default function Workspace({ projectId }: { projectId: string }) {
                 />
               )}
               {tab === "dashboard" && <Dashboard projectId={projectId} />}
+              {tab === "ai" && (
+                <AIPanel
+                  projectId={projectId}
+                  current={flatCurrent}
+                  onOpenSettings={() => setSettingsOpen(true)}
+                />
+              )}
             </div>
           </aside>
         )}
@@ -227,6 +263,19 @@ export default function Workspace({ projectId }: { projectId: string }) {
           onClose={() => setComposerOpen(false)}
         />
       )}
+
+      {driveOpen && (
+        <DriveMode
+          projectId={projectId}
+          narrator={narrator}
+          flat={flat}
+          currentIndex={currentIndex}
+          playing={playing}
+          onExit={() => setDriveOpen(false)}
+        />
+      )}
+
+      {settingsOpen && <SettingsModal onClose={() => setSettingsOpen(false)} />}
     </div>
   );
 }

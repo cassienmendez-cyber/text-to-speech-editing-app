@@ -80,5 +80,15 @@ implementation.
   commands, confidence settings, and quick/emergency capture. See
   [DRIVE_MODE.md](DRIVE_MODE.md).
 - **Revision intelligence** — Dashboard, passes, emotional-tag trends, and the
-  AI editorial assistant (Phase 2+).
-- **Sync layer** — Local-first persistence with automatic background sync.
+  AI editorial assistant.
+- **AI assistant** (`src/lib/ai.ts`) — Calls the Claude API (`claude-opus-4-8`)
+  via `@anthropic-ai/sdk` with the author's own key, directly from the browser
+  and only when explicitly enabled. Provides SUGGEST (rewrite), ANALYZE
+  (developmental insight, adaptive thinking), and pattern recognition. Every
+  rewrite requires explicit approval before it touches the manuscript; accepted
+  changes are recorded as restorable `Revision` entries.
+- **Desktop shell** (`src-tauri/`) — A Tauri wrapper that loads the same React
+  frontend (`frontendDist: ../dist`) as a local-first native app. Building it
+  requires the Tauri/WebKitGTK system prerequisites.
+- **Sync layer** — Local-first persistence with automatic background sync
+  (currently `localStorage` via the Zustand persist middleware).

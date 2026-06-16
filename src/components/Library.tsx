@@ -2,7 +2,8 @@ import { useRef, useState } from "react";
 import { useStore } from "../store";
 import { importManuscriptFile } from "../lib/import";
 import { countSentences, parseManuscript } from "../lib/parse";
-import { Book, Plus, Trash } from "./icons";
+import SettingsModal from "./SettingsModal";
+import { Book, Plus, Trash, Settings } from "./icons";
 
 const SAMPLE = `Chapter 1
 
@@ -26,6 +27,7 @@ export default function Library() {
   const inputRef = useRef<HTMLInputElement>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
   const list = Object.values(projects).sort(
     (a, b) => b.manuscript.updatedAt - a.manuscript.updatedAt,
@@ -54,6 +56,15 @@ export default function Library() {
 
   return (
     <div className="mx-auto max-w-3xl px-6 py-12">
+      <div className="flex justify-end">
+        <button
+          className="btn-icon"
+          title="Settings"
+          onClick={() => setSettingsOpen(true)}
+        >
+          <Settings />
+        </button>
+      </div>
       <header className="mb-10 text-center">
         <h1 className="text-4xl font-semibold tracking-tight text-ink-50">
           Story<span className="text-accent-500">Scribe</span>
@@ -63,6 +74,8 @@ export default function Library() {
           ideas by voice, and revise wherever stories happen.
         </p>
       </header>
+
+      {settingsOpen && <SettingsModal onClose={() => setSettingsOpen(false)} />}
 
       <div
         className="card flex flex-col items-center gap-4 border-dashed py-10 text-center"

@@ -99,7 +99,9 @@ npm run preview  # preview the production build
 5. Explore the **Notes**, **Bookmarks**, and **Dashboard** tabs, or toggle
    **Read like a reader** to hide editorial clutter.
 
-## Implemented (Phase 1 MVP)
+## Implemented
+
+**Phase 1 — capture (MVP)**
 
 - DOCX + TXT import (chapters, paragraphs, and scene breaks preserved)
 - Audiobook playback with play / pause / stop, 15s skip, repeat, speed
@@ -114,10 +116,50 @@ npm run preview  # preview the production build
   trends, resolution stats)
 - "Read like a reader" mode
 - Continuous autosave to local storage (offline-friendly)
+- **Drive Mode** — hands-free, eyes-on-the-road review: oversized controls,
+  customizable wake phrase, voice commands (pause/resume, skip, next/previous
+  chapter, add note, bookmark, flag pacing/continuity/character), quick capture,
+  beginner/standard/expert confidence settings, and a drive-session summary
 
-See the [Roadmap](docs/ROADMAP.md) for what's planned next, and
-[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for how it's built. Drive Mode and
-the AI editorial assistant are specified and slated for upcoming phases.
+**Phase 2 — revision intelligence (partial)**
+
+- **AI editorial assistant** (optional, off by default) — OFF / SUGGEST /
+  ANALYZE / COLLABORATE modes powered by the Claude API using *your own* key:
+  rewrite suggestions, developmental analysis, and note-pattern recognition.
+  **AI never changes your text without explicit approval** — every rewrite is
+  surfaced for accept / reject / edit, and accepted changes are tracked in
+  restorable revision history.
+
+**Desktop**
+
+- A **Tauri** shell (`src-tauri/`) wraps the exact same React frontend as a
+  local-first desktop app.
+
+See the [Roadmap](docs/ROADMAP.md) for what's next, and
+[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for how it's built.
+
+## Desktop build (Tauri)
+
+The web frontend doubles as the desktop UI. To run it as a native app you need
+the [Tauri prerequisites](https://tauri.app/start/prerequisites/) (Rust, and on
+Linux the WebKitGTK/`webkit2gtk-4.1` system libraries):
+
+```bash
+npm run tauri icon path/to/source.png   # one-time: generate app icons
+npm run tauri dev                        # run the desktop app
+npm run tauri build                      # produce installers
+```
+
+> The desktop build requires native system libraries and is not exercised by
+> the web `npm run dev` flow.
+
+## AI assistant setup
+
+The AI assistant is **opt-in**. Open **Settings** (gear icon), choose an AI mode
+(Suggest / Analyze / Collaborate), and paste your Anthropic API key. The key is
+stored locally on your device and is sent only to the Anthropic API, and only
+when you run an AI action. Leave AI **Off** to keep everything fully local. The
+assistant uses the `claude-opus-4-8` model via `@anthropic-ai/sdk`.
 
 ## Project Structure
 
@@ -127,8 +169,11 @@ src/
     parse.ts     # text -> chapters/paragraphs/sentences; flatten for playback
     import.ts    # DOCX/TXT import (mammoth)
     speech.ts    # TTS Narrator + voice-note capture (Web Speech API)
-  components/    # Library, Workspace, Reader, PlaybackBar, NotesPanel, ...
-  store.ts       # Zustand store with autosave persistence
+    ai.ts        # AI editorial assistant (Anthropic SDK, claude-opus-4-8)
+  components/    # Library, Workspace, Reader, PlaybackBar, NotesPanel,
+                 #   DriveMode, AIPanel, SettingsModal, ...
+  store.ts       # Zustand store with autosave persistence + settings
   types.ts       # core domain model
+src-tauri/       # Tauri desktop shell (Rust)
 docs/            # product spec, roadmap, architecture, drive mode, glossary
 ```

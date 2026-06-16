@@ -96,16 +96,46 @@ export interface RevisionPass {
   createdAt: number;
 }
 
+/** An accepted (or restorable) change to the manuscript. */
+export interface Revision {
+  id: string;
+  originalText: string;
+  revisedText: string;
+  dateAccepted: number;
+  /** Where the change came from. */
+  source: "ai-suggest" | "ai-collaborate" | "manual";
+  noteId?: string;
+  chapterId: string;
+  paragraphId: string;
+  /** True while currently applied to the manuscript (false after a restore). */
+  applied: boolean;
+}
+
 export interface Project {
   manuscript: Manuscript;
   notes: Note[];
   bookmarks: Bookmark[];
   passes: RevisionPass[];
+  revisions: Revision[];
   /** Persisted listening position: index into the flattened sentence list. */
   playbackIndex: number;
   /** Author-selected narration settings. */
   rate: number;
   voiceURI?: string;
+}
+
+export type AIMode = "off" | "suggest" | "analyze" | "collaborate";
+
+export type DrivingConfidence = "beginner" | "standard" | "expert";
+
+/** Application-wide settings (local to this device). */
+export interface Settings {
+  /** The author's own Anthropic API key. Stored locally; never sent anywhere
+   *  except directly to the Anthropic API when AI is explicitly enabled. */
+  apiKey: string;
+  aiMode: AIMode;
+  drivingConfidence: DrivingConfidence;
+  wakePhrase: string;
 }
 
 /** A flattened, ordered reference to a sentence and its location. */

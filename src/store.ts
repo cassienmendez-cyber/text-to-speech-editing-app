@@ -1,23 +1,51 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { nanoid } from "nanoid";
+import { splitSentences } from "./lib/parse";
 import type {
   Bookmark,
   Manuscript,
   Note,
   Project,
+  Revision,
   RevisionPass,
+  Settings,
 } from "./types";
+
+const DEFAULT_SETTINGS: Settings = {
+  apiKey: "",
+  aiMode: "off",
+  drivingConfidence: "standard",
+  wakePhrase: "hey storyscribe",
+};
 
 interface AppState {
   projects: Record<string, Project>;
   currentId: string | null;
+  settings: Settings;
+
+  setSetting: <K extends keyof Settings>(key: K, value: Settings[K]) => void;
 
   // Project lifecycle
   addProject: (manuscript: Manuscript) => string;
   removeProject: (id: string) => void;
   setCurrent: (id: string | null) => void;
   current: () => Project | null;
+
+  // Revisions (AI-assisted or manual edits to the manuscript)
+  addRevision: (projectId: string, revision: Revision) => void;
+  setRevisionApplied: (
+    projectId: string,
+    revisionId: string,
+    applied: boolean,
+  ) => void;
+  /** Replace a paragraph's text, re-splitting it into sentences. */
+  replaceParagraphText: (
+    projectId: string,
+    chapterId: string,
+    paragraphId: string,
+    newText: string,
+  ) => void;
 
   // Notes
   addNote: (projectId: string, note: Note) => void;
@@ -47,6 +75,10 @@ export const useStore = create<AppState>()(
     (set, get) => ({
       projects: {},
       currentId: null,
+      settings: DEFAULT_SETTINGS,
+
+      setSetting: (key, value) =>
+        set((s) => ({ settings: { ...s.settings, [key]: value } })),
 
       addProject: (manuscript) => {
         const project: Project = {
@@ -56,6 +88,7 @@ export const useStore = create<AppState>()(
           passes: [
             { id: nanoid(8), name: "First Draft Cleanup", createdAt: Date.now() },
           ],
+          revisions: [],
           playbackIndex: 0,
           rate: 1,
         };
@@ -82,6 +115,64 @@ export const useStore = create<AppState>()(
         const { projects, currentId } = get();
         return currentId ? projects[currentId] ?? null : null;
       },
+
+      addRevision: (projectId, revision) =>
+        set((s) => {
+          const p = s.projects[projectId];
+          if (!p) return s;
+          return {
+            projects: {
+              ...s.projects,
+              [projectId]: { ...p, revisions: [revision, ...p.revisions] },
+            },
+          };
+        }),
+
+      setRevisionApplied: (projectId, revisionId, applied) =>
+        set((s) => {
+          const p = s.projects[projectId];
+          if (!p) return s;
+          return {
+            projects: {
+              ...s.projects,
+              [projectId]: {
+                ...p,
+                revisions: p.revisions.map((r) =>
+                  r.id === revisionId ? { ...r, applied } : r,
+                ),
+              },
+            },
+          };
+        }),
+
+      replaceParagraphText: (projectId, chapterId, paragraphId, newText) =>
+        set((s) => {
+          const p = s.projects[projectId];
+          if (!p) return s;
+          const sentences = splitSentences(newText).map((text) => ({
+            id: nanoid(8),
+            text,
+          }));
+          const manuscript: Manuscript = {
+            ...p.manuscript,
+            updatedAt: Date.now(),
+            chapters: p.manuscript.chapters.map((c) =>
+              c.id !== chapterId
+                ? c
+                : {
+                    ...c,
+                    paragraphs: c.paragraphs.map((para) =>
+                      para.id !== paragraphId
+                        ? para
+                        : { ...para, sentences },
+                    ),
+                  },
+            ),
+          };
+          return {
+            projects: { ...s.projects, [projectId]: { ...p, manuscript } },
+          };
+        }),
 
       addNote: (projectId, note) =>
         set((s) => {
@@ -228,7 +319,19 @@ export const useStore = create<AppState>()(
     }),
     {
       name: "storyscribe-v1",
-      version: 1,
+      version: 2,
+      migrate: (persisted: any, version) => {
+        if (!persisted) return persisted;
+        if (version < 2) {
+          // Ensure every project has a revisions array and settings exist.
+          const projects = persisted.projects ?? {};
+          for (const id of Object.keys(projects)) {
+            if (!projects[id].revisions) projects[id].revisions = [];
+          }
+          persisted.settings = { ...DEFAULT_SETTINGS, ...persisted.settings };
+        }
+        return persisted;
+      },
     },
   ),
 );
