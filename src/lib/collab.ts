@@ -114,6 +114,24 @@ export function generateRoomCode(): string {
  * Signaling servers can be overridden via the VITE_SIGNALING env var
  * (comma-separated wss:// URLs); otherwise y-webrtc's defaults are used.
  */
+/** ICE servers for NAT traversal: a default public STUN, plus any servers
+ *  (typically TURN, with credentials) supplied as JSON in VITE_ICE_SERVERS. */
+function iceServers(): RTCIceServer[] {
+  const servers: RTCIceServer[] = [
+    { urls: "stun:stun.l.google.com:19302" },
+  ];
+  const raw = (import.meta.env.VITE_ICE_SERVERS as string | undefined) ?? "";
+  if (raw.trim()) {
+    try {
+      const extra = JSON.parse(raw);
+      if (Array.isArray(extra)) servers.push(...extra);
+    } catch {
+      console.warn("VITE_ICE_SERVERS is not valid JSON; ignoring.");
+    }
+  }
+  return servers;
+}
+
 export async function connectWebrtc(
   doc: Y.Doc,
   room: string,
@@ -125,5 +143,7 @@ export async function connectWebrtc(
   return new WebrtcProvider(`storyscribe-${room}`, doc, {
     password: password || undefined,
     ...(signaling.length ? { signaling } : {}),
+    // Passed through to simple-peer → RTCPeerConnection.
+    peerOpts: { config: { iceServers: iceServers() } },
   });
 }

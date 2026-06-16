@@ -195,6 +195,32 @@ npm run tauri build                      # produce installers
 > The desktop build requires native system libraries and is not exercised by
 > the web `npm run dev` flow.
 
+## Deploy (GitHub Pages, mobile-installable)
+
+A GitHub Actions workflow (`.github/workflows/deploy.yml`) builds and publishes
+the app to **GitHub Pages** on every push to `main`.
+
+One-time setup:
+
+1. **Repo → Settings → Pages → Build and deployment → Source: GitHub Actions.**
+2. Push to `main` (or run the *Deploy to GitHub Pages* workflow manually).
+3. The app goes live at `https://<you>.github.io/text-to-speech-editing-app/`.
+
+Because Pages serves HTTPS, the app is **installable on mobile**: open that URL
+in your phone's browser and choose **Add to Home Screen** for a full-screen,
+offline-capable PWA. (The deploy sets the correct base path automatically.)
+
+To enable live collaboration on the deployed app, add **repository variables**
+(Settings → Secrets and variables → Actions → *Variables*) before deploying:
+
+- `VITE_SIGNALING` — your signaling server URL, e.g. `wss://your-host`
+  (see [`server/`](server/README.md) to deploy one).
+- `VITE_ICE_SERVERS` — optional TURN servers (JSON) for strict NATs.
+
+> GitHub Pages is static, so it can't host the signaling server — deploy that
+> separately (see `server/README.md`). Without `VITE_SIGNALING`, the app falls
+> back to y-webrtc's public signaling servers.
+
 ## Real-time collaboration setup
 
 Collaboration is **peer-to-peer** (WebRTC, with a Yjs CRDT for conflict-free
