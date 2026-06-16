@@ -3,7 +3,8 @@ import { useStore } from "../store";
 import { importManuscriptFile } from "../lib/import";
 import { countSentences, parseManuscript } from "../lib/parse";
 import SettingsModal from "./SettingsModal";
-import { Book, Plus, Trash, Settings } from "./icons";
+import CollabModal from "./CollabModal";
+import { Book, Plus, Trash, Settings, Users } from "./icons";
 
 const SAMPLE = `Chapter 1
 
@@ -28,6 +29,7 @@ export default function Library() {
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [collabOpen, setCollabOpen] = useState(false);
 
   const list = Object.values(projects).sort(
     (a, b) => b.manuscript.updatedAt - a.manuscript.updatedAt,
@@ -56,7 +58,14 @@ export default function Library() {
 
   return (
     <div className="mx-auto max-w-3xl px-6 py-12">
-      <div className="flex justify-end">
+      <div className="flex justify-end gap-2">
+        <button
+          className="btn-ghost"
+          title="Join a live collaboration session"
+          onClick={() => setCollabOpen(true)}
+        >
+          <Users /> Join session
+        </button>
         <button
           className="btn-icon"
           title="Settings"
@@ -65,6 +74,8 @@ export default function Library() {
           <Settings />
         </button>
       </div>
+
+      {collabOpen && <CollabModal onClose={() => setCollabOpen(false)} />}
       <header className="mb-10 text-center">
         <h1 className="text-4xl font-semibold tracking-tight text-ink-50">
           Story<span className="text-accent-500">Scribe</span>

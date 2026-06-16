@@ -11,7 +11,9 @@ import NoteComposer from "./NoteComposer";
 import DriveMode from "./DriveMode";
 import SettingsModal from "./SettingsModal";
 import StoryBible from "./StoryBible";
+import CollabModal from "./CollabModal";
 import SidePanel, { type Tab } from "./SidePanel";
+import { useCollab } from "../collab-context";
 import {
   ArrowLeft,
   Eye,
@@ -20,6 +22,7 @@ import {
   Edit,
   X,
   Book,
+  Users,
 } from "./icons";
 
 export default function Workspace({ projectId }: { projectId: string }) {
@@ -56,6 +59,8 @@ export default function Workspace({ projectId }: { projectId: string }) {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [bibleOpen, setBibleOpen] = useState(false);
   const [bibleFocus, setBibleFocus] = useState<string | null>(null);
+  const [collabOpen, setCollabOpen] = useState(false);
+  const collab = useCollab();
   // Mobile-only: the editorial panel opens as a slide-in drawer.
   const [panelOpen, setPanelOpen] = useState(false);
 
@@ -198,6 +203,18 @@ export default function Workspace({ projectId }: { projectId: string }) {
           <span className="hidden md:inline">Drive Mode</span>
         </button>
         <button
+          className={`btn-ghost shrink-0 ${collab.status === "connected" ? "border border-emerald-500 text-emerald-300" : ""}`}
+          onClick={() => setCollabOpen(true)}
+          title="Live collaboration"
+        >
+          <Users />
+          <span className="hidden md:inline">
+            {collab.status === "connected"
+              ? `Live · ${collab.peers}`
+              : "Collaborate"}
+          </span>
+        </button>
+        <button
           className="btn-icon shrink-0"
           onClick={() => setSettingsOpen(true)}
           title="Settings"
@@ -327,6 +344,8 @@ export default function Workspace({ projectId }: { projectId: string }) {
       )}
 
       {settingsOpen && <SettingsModal onClose={() => setSettingsOpen(false)} />}
+
+      {collabOpen && <CollabModal onClose={() => setCollabOpen(false)} />}
 
       {bibleOpen && (
         <StoryBible

@@ -166,6 +166,11 @@ Icons are generated with `npm run icons` (re-run if you change the artwork).
   profile; each profile lists every place it's mentioned with jump-to-location.
 - **Beta-reader collaboration** — notes carry an Author / Editor / Beta-Reader
   role (filterable), keeping multi-collaborator feedback distinguishable.
+- **Real-time collaboration** — share a project live with editors and beta
+  readers over an encrypted peer-to-peer connection (WebRTC + a Yjs CRDT).
+  Manuscript and notes sync and merge conflict-free in both directions; each
+  participant keeps their own listening position. Host from the Workspace
+  (**Collaborate**) or join from the Library with a room code.
 
 **Desktop**
 
@@ -190,6 +195,30 @@ npm run tauri build                      # produce installers
 > The desktop build requires native system libraries and is not exercised by
 > the web `npm run dev` flow.
 
+## Real-time collaboration setup
+
+Collaboration is **peer-to-peer** (WebRTC, with a Yjs CRDT for conflict-free
+merging). Peers find each other through a **signaling server** that only relays
+connection handshakes — your manuscript and notes travel directly between peers,
+and a session **passphrase** end-to-end encrypts them.
+
+- **Host:** open a project → **Collaborate** → *Start sharing* → share the room
+  code (and passphrase).
+- **Join:** from the Library → **Join session** → enter the code (+ passphrase).
+
+By default the app uses y-webrtc's public signaling servers. For reliability and
+privacy, run your own and set `VITE_SIGNALING` (see `.env.example`):
+
+```bash
+PORT=4444 node node_modules/y-webrtc/bin/server.js   # simple signaling server
+VITE_SIGNALING=ws://localhost:4444 npm run build      # point the app at it
+```
+
+> Because WebRTC needs a network path between peers, restrictive firewalls/NATs
+> can block direct connections (a TURN relay would be needed for those cases).
+> A two-peer sync harness is provided at `scripts/collab-e2e.mjs` for verifying
+> against a real signaling server.
+
 ## AI assistant setup
 
 The AI assistant is **opt-in**. Open **Settings** (gear icon), choose an AI mode
@@ -212,6 +241,8 @@ src/
     ai.ts        # AI editorial assistant (Anthropic SDK, claude-opus-4-8)
   components/    # Library, Workspace, Reader, PlaybackBar, NotesPanel,
                  #   DriveMode, AIPanel, SettingsModal, ...
+    collab.ts    # Yjs CRDT project binding + WebRTC connector
+  collab-context.tsx # app-wide live-collaboration session
   store.ts       # Zustand store with autosave persistence + settings
   types.ts       # core domain model
 src-tauri/       # Tauri desktop shell (Rust)
