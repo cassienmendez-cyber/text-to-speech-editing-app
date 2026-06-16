@@ -18,9 +18,10 @@ export default {
           950: "#12141c",
         },
         accent: {
-          400: "#f0a35e",
-          500: "#e8893a",
-          600: "#d4722a",
+          300: "rgb(var(--accent-300) / <alpha-value>)",
+          400: "rgb(var(--accent-400) / <alpha-value>)",
+          500: "rgb(var(--accent-500) / <alpha-value>)",
+          600: "rgb(var(--accent-600) / <alpha-value>)",
         },
       },
       fontFamily: {

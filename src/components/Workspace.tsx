@@ -268,7 +268,7 @@ export default function Workspace({ projectId }: { projectId: string }) {
       {panelOpen && !readerMode && (
         <div className="fixed inset-0 z-40 lg:hidden">
           <div
-            className="absolute inset-0 bg-black/60"
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
             onClick={() => setPanelOpen(false)}
           />
           <div className="absolute inset-y-0 right-0 flex w-[88%] max-w-sm flex-col bg-ink-900 shadow-2xl">

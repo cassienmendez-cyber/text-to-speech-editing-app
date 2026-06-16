@@ -5,6 +5,17 @@
 @layer base {
   :root {
     color-scheme: dark;
+    /* Default theme: "Ember". Themes override these (see [data-theme]). */
+    --accent-300: 240 178 120;
+    --accent-400: 240 163 94;
+    --accent-500: 232 137 58;
+    --accent-600: 212 114 42;
+    --bg-base: #12141c;
+    --bg-grad: radial-gradient(
+      1200px 600px at 50% -10%,
+      rgb(var(--accent-500) / 0.1),
+      transparent 60%
+    );
   }
 
   html,
@@ -14,9 +25,141 @@
   }
 
   body {
-    @apply bg-ink-950 text-ink-100 antialiased;
+    @apply text-ink-100 antialiased;
     margin: 0;
+    background-color: var(--bg-base);
+    background-image: var(--bg-grad);
+    background-attachment: fixed;
+    background-repeat: no-repeat;
   }
+
+  /* Custom dropdown caret, inset from the edge (the native one sat too flush). */
+  select {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23aeb6c8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.6rem center;
+    background-size: 1rem;
+    padding-right: 2rem;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Color themes — set the accent palette and an atmospheric background.
+   Applied via <html data-theme="…"> from Settings.
+--------------------------------------------------------------------------- */
+[data-theme="halloween"] {
+  --accent-300: 253 186 116;
+  --accent-400: 251 146 60;
+  --accent-500: 234 88 12;
+  --accent-600: 194 65 12;
+  --bg-base: #0c0a12;
+  --bg-grad: radial-gradient(
+      1000px 520px at 80% -10%,
+      rgba(124, 58, 237, 0.32),
+      transparent 60%
+    ),
+    radial-gradient(
+      820px 520px at 5% 115%,
+      rgba(234, 88, 12, 0.2),
+      transparent 60%
+    );
+}
+
+[data-theme="ocean"] {
+  --accent-300: 125 211 252;
+  --accent-400: 56 189 248;
+  --accent-500: 14 165 233;
+  --accent-600: 2 132 199;
+  --bg-base: #08111c;
+  --bg-grad: radial-gradient(
+      1000px 600px at 50% -10%,
+      rgba(14, 165, 233, 0.2),
+      transparent 60%
+    ),
+    radial-gradient(
+      900px 620px at 50% 120%,
+      rgba(13, 148, 136, 0.18),
+      transparent 60%
+    );
+}
+
+[data-theme="irish"] {
+  --accent-300: 134 239 172;
+  --accent-400: 74 222 128;
+  --accent-500: 34 197 94;
+  --accent-600: 22 163 74;
+  --bg-base: #07140d;
+  --bg-grad: radial-gradient(
+      1000px 600px at 50% -10%,
+      rgba(34, 197, 94, 0.2),
+      transparent 60%
+    ),
+    radial-gradient(
+      700px 500px at 90% 120%,
+      rgba(202, 138, 4, 0.14),
+      transparent 60%
+    );
+}
+
+[data-theme="rainbow"] {
+  --accent-300: 240 171 252;
+  --accent-400: 232 121 249;
+  --accent-500: 217 70 239;
+  --accent-600: 192 38 211;
+  --bg-base: #0c0a14;
+  --bg-grad: linear-gradient(
+    135deg,
+    rgba(244, 63, 94, 0.16),
+    rgba(249, 115, 22, 0.14),
+    rgba(234, 179, 8, 0.14),
+    rgba(34, 197, 94, 0.14),
+    rgba(14, 165, 233, 0.14),
+    rgba(168, 85, 247, 0.18)
+  );
+}
+
+[data-theme="synthwave"] {
+  --accent-300: 249 168 212;
+  --accent-400: 244 114 182;
+  --accent-500: 219 39 119;
+  --accent-600: 190 24 93;
+  --bg-base: #0e0b1a;
+  --bg-grad: radial-gradient(
+      900px 500px at 50% -10%,
+      rgba(219, 39, 119, 0.26),
+      transparent 60%
+    ),
+    radial-gradient(
+      900px 600px at 50% 120%,
+      rgba(56, 189, 248, 0.16),
+      transparent 60%
+    );
+}
+
+[data-theme="hilo"] {
+  /* Hi-Lo: high-energy neon on pure black. */
+  --accent-300: 190 255 120;
+  --accent-400: 163 255 79;
+  --accent-500: 132 240 40;
+  --accent-600: 101 200 20;
+  --bg-base: #000000;
+  --bg-grad: none;
+}
+
+[data-theme="sakura"] {
+  --accent-300: 251 207 232;
+  --accent-400: 244 164 196;
+  --accent-500: 236 110 173;
+  --accent-600: 219 70 143;
+  --bg-base: #160f14;
+  --bg-grad: radial-gradient(
+    1000px 560px at 50% -10%,
+    rgba(236, 110, 173, 0.18),
+    transparent 60%
+  );
 }
 
 @layer components {
@@ -53,10 +196,29 @@
     @apply inline-flex items-center gap-1 rounded-full border border-ink-700
       bg-ink-800 px-2 py-0.5 text-xs text-ink-200;
   }
+
+  /* Frosted-glass modal: blurs the app behind so its text doesn't bleed
+     through, over a near-opaque panel with a subtle top sheen. */
+  .modal-scrim {
+    @apply fixed inset-0 z-50 flex items-center justify-center p-4;
+    background: rgba(4, 5, 9, 0.7);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+  }
+
+  .sheet {
+    @apply rounded-xl border border-ink-700 p-4;
+    background-color: rgb(20 22 31 / 0.97);
+    background-image: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.05),
+      rgba(255, 255, 255, 0)
+    );
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  }
 }
 
-/* High-contrast accessibility theme: pure-black surfaces, brighter text and
-   borders, stronger active highlight. Toggled via <html class="hc">. */
+/* High-contrast accessibility theme (layered on top of any color theme). */
 html.hc body {
   background: #000;
   color: #fff;
@@ -64,7 +226,8 @@ html.hc body {
 html.hc .card,
 html.hc .field,
 html.hc .btn-ghost,
-html.hc .btn-icon {
+html.hc .btn-icon,
+html.hc .sheet {
   border-color: #fff !important;
   background: #0a0a0a !important;
   color: #fff !important;
@@ -73,7 +236,6 @@ html.hc .chip {
   border-color: #fff !important;
   color: #fff !important;
 }
-/* Lift muted greys to a readable contrast. */
 html.hc .text-ink-300,
 html.hc .text-ink-400,
 html.hc .text-ink-500 {
@@ -92,7 +254,7 @@ html.hc .border-ink-700 {
 /* Highlight for the sentence currently being narrated. */
 .sentence-active {
   @apply rounded bg-accent-500/25 text-ink-50;
-  box-shadow: 0 0 0 2px rgba(232, 137, 58, 0.25);
+  box-shadow: 0 0 0 2px rgb(var(--accent-500) / 0.25);
 }
 
 .sentence:hover {
