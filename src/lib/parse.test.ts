@@ -66,6 +66,30 @@ Only one paragraph here.`;
     const ids = flattenSentences(m).map((f) => f.sentence.id);
     expect(new Set(ids).size).toBe(ids.length);
   });
+
+  it("ignores a running head that repeats the current chapter title", () => {
+    // A PDF running head printing "Chapter 1" atop each page must not split
+    // one chapter into several.
+    const raw = `Chapter 1
+
+First page prose here.
+
+Chapter 1
+
+Second page prose continues.`;
+    const m = parseManuscript(raw, "Run", "pdf");
+    expect(m.chapters.map((c) => c.title)).toEqual(["Chapter 1"]);
+    expect(m.chapters[0].paragraphs).toHaveLength(2);
+  });
+
+  it("treats a long prose line starting with 'Chapter' as prose, not a heading", () => {
+    const raw =
+      "Chapter books were her favorite thing in the whole world and she read them every single night before bed.";
+    const m = parseManuscript(raw, "Prose", "pdf");
+    expect(m.chapters).toHaveLength(1);
+    expect(m.chapters[0].title).toBe("Chapter 1");
+    expect(countSentences(m)).toBe(1);
+  });
 });
 
 describe("flattenSentences", () => {
