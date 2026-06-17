@@ -313,6 +313,24 @@ export default function SettingsModal({ onClose }: { onClose: () => void }) {
 
         <section className="space-y-2">
           <h4 className="text-xs font-semibold uppercase tracking-wide text-ink-400">
+            Reading
+          </h4>
+          <label className="flex items-center gap-2 text-sm text-ink-200">
+            <input
+              type="checkbox"
+              checked={settings.highlightNames}
+              onChange={(e) => setSetting("highlightNames", e.target.checked)}
+            />
+            Highlight character &amp; place names
+          </label>
+          <p className="text-xs text-ink-500">
+            Off by default so your manuscript reads exactly as written. When on,
+            names from the Story Bible are highlighted and tappable in the text.
+          </p>
+        </section>
+
+        <section className="space-y-2">
+          <h4 className="text-xs font-semibold uppercase tracking-wide text-ink-400">
             Accessibility
           </h4>
           <label className="flex items-center gap-2 text-sm text-ink-200">

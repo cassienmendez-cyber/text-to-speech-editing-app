@@ -10,6 +10,7 @@ import PlaybackBar from "./PlaybackBar";
 import NoteComposer from "./NoteComposer";
 import DriveMode from "./DriveMode";
 import SettingsModal from "./SettingsModal";
+import ChapterMenu from "./ChapterMenu";
 import StoryBible from "./StoryBible";
 import CollabModal from "./CollabModal";
 import SidePanel, { type Tab } from "./SidePanel";
@@ -32,6 +33,7 @@ export default function Workspace({ projectId }: { projectId: string }) {
   const voicePref = useStore((s) => s.settings.voiceURI);
   const ttsEngine = useStore((s) => s.settings.ttsEngine);
   const espeakVoice = useStore((s) => s.settings.espeakVoice);
+  const highlightNames = useStore((s) => s.settings.highlightNames);
   const addBookmark = useStore((s) => s.addBookmark);
 
   // Depend on the manuscript, not the whole project: playback-position and
@@ -42,6 +44,20 @@ export default function Workspace({ projectId }: { projectId: string }) {
     () => (manuscript ? flattenSentences(manuscript) : []),
     [manuscript],
   );
+
+  // One entry per chapter, with the flattened index of its first sentence —
+  // powers the quick chapter-jump menu.
+  const chapters = useMemo(() => {
+    const list: { id: string; title: string; index: number }[] = [];
+    let lastId: string | null = null;
+    for (const f of flat) {
+      if (f.chapter.id !== lastId) {
+        list.push({ id: f.chapter.id, title: f.chapter.title, index: f.index });
+        lastId = f.chapter.id;
+      }
+    }
+    return list;
+  }, [flat]);
 
   // Story-bible ↔ manuscript links: where each character/world name appears,
   // and per-sentence segments so the reader can render them as profile links.
@@ -61,6 +77,7 @@ export default function Workspace({ projectId }: { projectId: string }) {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [bibleOpen, setBibleOpen] = useState(false);
   const [bibleFocus, setBibleFocus] = useState<string | null>(null);
+  const [chaptersOpen, setChaptersOpen] = useState(false);
   const [collabOpen, setCollabOpen] = useState(false);
   const collab = useCollab();
   const fontScale = useStore((s) => s.settings.fontScale);
@@ -257,7 +274,9 @@ export default function Workspace({ projectId }: { projectId: string }) {
             notes={project.notes}
             readerMode={readerMode}
             onSeek={(i) => narrator.seek(i)}
-            segments={mentions?.segmentsBySentenceId}
+            segments={
+              highlightNames ? mentions?.segmentsBySentenceId : undefined
+            }
             fontScale={fontScale}
             onEntityClick={(id) => {
               setBibleFocus(id);
@@ -336,6 +355,7 @@ export default function Workspace({ projectId }: { projectId: string }) {
           setComposerOpen(true);
         }}
         onBookmark={handleBookmark}
+        onOpenChapters={() => setChaptersOpen(true)}
       />
 
       {composerOpen && (
@@ -356,6 +376,15 @@ export default function Workspace({ projectId }: { projectId: string }) {
           currentIndex={currentIndex}
           playing={playing}
           onExit={() => setDriveOpen(false)}
+        />
+      )}
+
+      {chaptersOpen && (
+        <ChapterMenu
+          chapters={chapters}
+          currentId={flatCurrent?.chapter.id}
+          onJump={(i) => narrator.seek(i)}
+          onClose={() => setChaptersOpen(false)}
         />
       )}
 

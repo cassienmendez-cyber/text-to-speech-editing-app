@@ -200,6 +200,9 @@ export interface Settings {
   ttsEngine: "device" | "espeak";
   /** Selected eSpeak voice id (when ttsEngine === "espeak"). */
   espeakVoice: string;
+  /** Highlight character/place names from the Story Bible in the text.
+   *  Off by default so imported manuscripts read clean & consistent. */
+  highlightNames: boolean;
 }
 
 /** A flattened, ordered reference to a sentence and its location. */
