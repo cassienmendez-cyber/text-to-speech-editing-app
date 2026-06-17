@@ -196,6 +196,10 @@ export interface Settings {
   fontScale: number;
   /** Preferred narration voice (set-and-forget; lives in Settings). */
   voiceURI?: string;
+  /** Narration engine: the device's voices, or bundled free offline eSpeak. */
+  ttsEngine: "device" | "espeak";
+  /** Selected eSpeak voice id (when ttsEngine === "espeak"). */
+  espeakVoice: string;
 }
 
 /** A flattened, ordered reference to a sentence and its location. */

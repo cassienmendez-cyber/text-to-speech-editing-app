@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useStore, clampFontScale, FONT_STEP } from "../store";
 import { loadVoices } from "../lib/speech";
+import { ESPEAK_VOICES } from "../lib/espeak";
 import type { AIMode, DrivingConfidence, Settings } from "../types";
 import { X } from "./icons";
 
@@ -137,24 +138,79 @@ export default function SettingsModal({ onClose }: { onClose: () => void }) {
           <h4 className="text-xs font-semibold uppercase tracking-wide text-ink-400">
             Narration voice
           </h4>
-          {voices.length > 0 ? (
-            <select
-              className="field"
-              value={settings.voiceURI ?? ""}
-              onChange={(e) =>
-                setSetting("voiceURI", e.target.value || undefined)
-              }
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              onClick={() => setSetting("ttsEngine", "device")}
+              className={`rounded-lg border p-2 text-left text-sm ${
+                settings.ttsEngine === "device"
+                  ? "border-accent-500 bg-ink-800 text-ink-50"
+                  : "border-ink-700 text-ink-300 hover:border-ink-600"
+              }`}
             >
-              <option value="">System default</option>
-              {voices.map((v) => (
-                <option key={v.voiceURI} value={v.voiceURI}>
-                  {v.name}
-                </option>
-              ))}
-            </select>
+              <div className="font-medium">Device voices</div>
+              <div className="text-xs text-ink-400">
+                Your phone/browser voices.
+              </div>
+            </button>
+            <button
+              onClick={() => setSetting("ttsEngine", "espeak")}
+              className={`rounded-lg border p-2 text-left text-sm ${
+                settings.ttsEngine === "espeak"
+                  ? "border-accent-500 bg-ink-800 text-ink-50"
+                  : "border-ink-700 text-ink-300 hover:border-ink-600"
+              }`}
+            >
+              <div className="font-medium">Built-in (offline)</div>
+              <div className="text-xs text-ink-400">
+                Free eSpeak voices &amp; accents.
+              </div>
+            </button>
+          </div>
+
+          {settings.ttsEngine === "espeak" ? (
+            <>
+              <select
+                className="field"
+                value={settings.espeakVoice}
+                onChange={(e) => setSetting("espeakVoice", e.target.value)}
+              >
+                {ESPEAK_VOICES.map((v) => (
+                  <option key={v.id} value={v.id}>
+                    {v.label}
+                  </option>
+                ))}
+              </select>
+              <p className="text-xs text-ink-500">
+                Built-in voices are robotic but free, fully offline, and the same
+                on every device. They load on first use.
+              </p>
+            </>
+          ) : voices.length > 0 ? (
+            <>
+              <select
+                className="field"
+                value={settings.voiceURI ?? ""}
+                onChange={(e) =>
+                  setSetting("voiceURI", e.target.value || undefined)
+                }
+              >
+                <option value="">System default</option>
+                {voices.map((v) => (
+                  <option key={v.voiceURI} value={v.voiceURI}>
+                    {v.name} — {v.lang}
+                  </option>
+                ))}
+              </select>
+              <p className="text-xs text-ink-500">
+                Voices come from your device/browser. On phones, several options
+                may share the same underlying system voice — install more
+                text-to-speech voices in your device settings, or switch to the
+                built-in voices above.
+              </p>
+            </>
           ) : (
             <p className="text-xs text-ink-500">
-              No text-to-speech voices available in this browser.
+              No device voices available — switch to the built-in voices above.
             </p>
           )}
         </section>

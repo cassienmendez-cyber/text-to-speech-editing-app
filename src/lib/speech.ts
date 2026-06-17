@@ -1,6 +1,9 @@
 // Browser-native speech: text-to-speech narration and speech-to-text capture.
 // Everything runs locally in the browser, satisfying the local-first and
 // privacy principles (no manuscript audio leaves the device).
+import { espeakSpeak, espeakStop } from "./espeak";
+
+export type TtsEngine = "device" | "espeak";
 
 export function ttsSupported(): boolean {
   return typeof window !== "undefined" && "speechSynthesis" in window;
@@ -51,11 +54,46 @@ export class Narrator {
   private index = 0;
   private rate = 1;
   private voice: SpeechSynthesisVoice | null = null;
+  private engine: TtsEngine = "device";
+  private espeakVoice = "en/en-us";
   private playing = false;
   private opts: NarratorOptions;
 
   constructor(opts: NarratorOptions) {
     this.opts = opts;
+  }
+
+  /** Choose the narration engine: the device's voices, or the bundled free
+   *  offline eSpeak voices. */
+  setEngine(engine: TtsEngine, espeakVoice?: string) {
+    this.engine = engine;
+    if (espeakVoice) this.espeakVoice = espeakVoice;
+    if (this.playing) this.speakCurrent();
+  }
+
+  private available(): boolean {
+    return this.engine === "espeak" || ttsSupported();
+  }
+
+  private cancelCurrent() {
+    if (this.engine === "espeak") espeakStop();
+    else if (ttsSupported()) window.speechSynthesis.cancel();
+  }
+
+  private finishEnd() {
+    this.playing = false;
+    this.opts.onState(false);
+    this.opts.onEnd();
+  }
+
+  private advance() {
+    if (!this.playing) return;
+    if (this.index >= this.sentences.length - 1) {
+      this.finishEnd();
+      return;
+    }
+    this.index += 1;
+    this.speakCurrent();
   }
 
   setSentences(sentences: string[]) {
@@ -105,7 +143,7 @@ export class Narrator {
   }
 
   play() {
-    if (!ttsSupported() || this.sentences.length === 0) return;
+    if (!this.available() || this.sentences.length === 0) return;
     this.playing = true;
     this.opts.onState(true);
     this.speakCurrent();
@@ -114,7 +152,7 @@ export class Narrator {
   pause() {
     this.playing = false;
     this.opts.onState(false);
-    if (ttsSupported()) window.speechSynthesis.cancel();
+    this.cancelCurrent();
   }
 
   stop() {
@@ -122,35 +160,33 @@ export class Narrator {
     this.index = 0;
     this.opts.onState(false);
     this.opts.onIndex(0);
-    if (ttsSupported()) window.speechSynthesis.cancel();
+    this.cancelCurrent();
   }
 
   private speakCurrent() {
-    if (!ttsSupported()) return;
-    window.speechSynthesis.cancel();
+    this.cancelCurrent();
     const text = this.sentences[this.index];
     if (text === undefined) {
-      this.playing = false;
-      this.opts.onState(false);
-      this.opts.onEnd();
+      this.finishEnd();
       return;
     }
     this.opts.onIndex(this.index);
 
+    if (this.engine === "espeak") {
+      void espeakSpeak(text, this.espeakVoice, this.rate, () => this.advance());
+      return;
+    }
+
+    if (!ttsSupported()) return;
     const utter = new SpeechSynthesisUtterance(text);
     utter.rate = this.rate;
-    if (this.voice) utter.voice = this.voice;
-    utter.onend = () => {
-      if (!this.playing) return;
-      if (this.index >= this.sentences.length - 1) {
-        this.playing = false;
-        this.opts.onState(false);
-        this.opts.onEnd();
-        return;
-      }
-      this.index += 1;
-      this.speakCurrent();
-    };
+    if (this.voice) {
+      utter.voice = this.voice;
+      // Some engines (notably Android Chrome) ignore `voice` unless `lang`
+      // also matches — without this every voice falls back to the default.
+      utter.lang = this.voice.lang;
+    }
+    utter.onend = () => this.advance();
     utter.onerror = (e) => {
       // "interrupted" / "canceled" are expected when we seek; ignore those.
       if (e.error === "interrupted" || e.error === "canceled") return;

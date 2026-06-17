@@ -30,6 +30,8 @@ export default function Workspace({ projectId }: { projectId: string }) {
   const setCurrent = useStore((s) => s.setCurrent);
   const setRateStore = useStore((s) => s.setRate);
   const voicePref = useStore((s) => s.settings.voiceURI);
+  const ttsEngine = useStore((s) => s.settings.ttsEngine);
+  const espeakVoice = useStore((s) => s.settings.espeakVoice);
   const addBookmark = useStore((s) => s.addBookmark);
 
   // Depend on the manuscript, not the whole project: playback-position and
@@ -104,6 +106,11 @@ export default function Workspace({ projectId }: { projectId: string }) {
     const v = voices.find((v) => v.voiceURI === voicePref) ?? null;
     narrator.setVoice(v);
   }, [narrator, voices, voicePref]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Apply the narration engine (device vs free offline eSpeak).
+  useEffect(() => {
+    narrator.setEngine(ttsEngine, espeakVoice);
+  }, [narrator, ttsEngine, espeakVoice]);
 
   if (!project) return null;
 
@@ -314,7 +321,7 @@ export default function Workspace({ projectId }: { projectId: string }) {
         playing={playing}
         rate={project.rate}
         locationLabel={locationLabel}
-        ttsAvailable={ttsSupported()}
+        ttsAvailable={ttsEngine === "espeak" || ttsSupported()}
         onPlay={() => narrator.play()}
         onPause={() => narrator.pause()}
         onSkipBack={() => narrator.skipBackward()}

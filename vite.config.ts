@@ -46,11 +46,32 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ["**/*.{js,css,html,svg,png,woff,woff2}"],
+        // The eSpeak engine + voice data (~1.7 MB) shouldn't bloat everyone's
+        // install — cache it at runtime only if the author uses it.
+        globIgnores: ["**/espeak-*.js"],
         navigateFallback: `${base}index.html`,
+        navigateFallbackDenylist: [/espeak-.*\.js$/],
         maximumFileSizeToCacheInBytes: 4 * 1024 * 1024,
+        runtimeCaching: [
+          {
+            urlPattern: /espeak-.*\.js$/,
+            handler: "CacheFirst",
+            options: { cacheName: "espeak-voices" },
+          },
+        ],
       },
     }),
   ],
+  build: {
+    rollupOptions: {
+      output: {
+        // Keep the eSpeak engine + voices in one named, on-demand chunk.
+        manualChunks(id: string) {
+          if (id.includes("node_modules/mespeak")) return "espeak";
+        },
+      },
+    },
+  },
   server: {
     host: true,
     port: 5173,
