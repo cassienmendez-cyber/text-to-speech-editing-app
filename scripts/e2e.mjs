@@ -143,20 +143,6 @@ try {
     await page.waitForSelector(".sentence", { timeout: 5000 });
   });
 
-  await step("enable name highlighting (opt-in)", async () => {
-    // Name links are off by default (clean text); turn them on for the test.
-    await page.click('button[title="Settings"]');
-    await waitText(page, "Anthropic API key");
-    await page.evaluate(() => {
-      const label = [...document.querySelectorAll("label")].find((l) =>
-        l.textContent.includes("Highlight character"),
-      );
-      label.querySelector("input").click();
-    });
-    await clickText(page, "Done");
-    await page.waitForSelector(".sentence", { timeout: 5000 });
-  });
-
   await step("manuscript ↔ bible linking round-trip", async () => {
     // "Mara" appears in the sample manuscript and is now a clickable link.
     await page.waitForFunction(() =>

@@ -324,8 +324,9 @@ export default function SettingsModal({ onClose }: { onClose: () => void }) {
             Highlight character &amp; place names
           </label>
           <p className="text-xs text-ink-500">
-            Off by default so your manuscript reads exactly as written. When on,
-            names from the Story Bible are highlighted and tappable in the text.
+            Names you add to the Story Bible are colored and tappable in the
+            text (a quick reference — no API key needed). Turn this off for a
+            fully plain page.
           </p>
         </section>
 

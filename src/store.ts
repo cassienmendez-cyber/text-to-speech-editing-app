@@ -28,7 +28,7 @@ const DEFAULT_SETTINGS: Settings = {
   fontScale: 1,
   ttsEngine: "device",
   espeakVoice: "en/en-us",
-  highlightNames: false,
+  highlightNames: true,
 };
 
 /** Reader font-scale bounds. */
