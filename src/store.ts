@@ -551,7 +551,7 @@ export const useStore = create<AppState>()(
           persisted.settings = { ...DEFAULT_SETTINGS, ...persisted.settings };
         }
         if (version < 10) {
-          // Clean-text default: name highlighting is now opt-in.
+          // Story Bible name-highlighting toggle (defaults on).
           persisted.settings = { ...DEFAULT_SETTINGS, ...persisted.settings };
         }
         return persisted;
