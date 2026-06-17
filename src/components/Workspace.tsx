@@ -23,6 +23,7 @@ import {
   Edit,
   X,
   Book,
+  List,
   Users,
 } from "./icons";
 
@@ -197,8 +198,14 @@ export default function Workspace({ projectId }: { projectId: string }) {
             {project.manuscript.title}
           </h1>
           <p className="truncate text-xs text-ink-400">
-            {project.manuscript.chapters.length} chapters · {project.notes.length}{" "}
-            notes
+            <button
+              className="rounded underline-offset-2 hover:text-ink-200 hover:underline"
+              onClick={() => setChaptersOpen(true)}
+              title="Jump to a chapter"
+            >
+              {project.manuscript.chapters.length} chapters
+            </button>{" "}
+            · {project.notes.length} notes
           </p>
         </div>
         <button
@@ -215,6 +222,14 @@ export default function Workspace({ projectId }: { projectId: string }) {
           <span className="hidden md:inline">
             {readerMode ? "Reader" : "Notate"}
           </span>
+        </button>
+        <button
+          className="btn-ghost hidden shrink-0 sm:inline-flex"
+          onClick={() => setChaptersOpen(true)}
+          title="Chapters — jump to any chapter"
+        >
+          <List />
+          <span className="hidden md:inline">Chapters</span>
         </button>
         <button
           className="btn-ghost shrink-0"
