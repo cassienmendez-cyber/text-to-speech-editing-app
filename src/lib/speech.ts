@@ -139,7 +139,12 @@ export class Narrator {
 
     const utter = new SpeechSynthesisUtterance(text);
     utter.rate = this.rate;
-    if (this.voice) utter.voice = this.voice;
+    if (this.voice) {
+      utter.voice = this.voice;
+      // Some engines (notably Android Chrome) ignore `voice` unless `lang`
+      // also matches — without this every voice falls back to the default.
+      utter.lang = this.voice.lang;
+    }
     utter.onend = () => {
       if (!this.playing) return;
       if (this.index >= this.sentences.length - 1) {

@@ -138,20 +138,27 @@ export default function SettingsModal({ onClose }: { onClose: () => void }) {
             Narration voice
           </h4>
           {voices.length > 0 ? (
-            <select
-              className="field"
-              value={settings.voiceURI ?? ""}
-              onChange={(e) =>
-                setSetting("voiceURI", e.target.value || undefined)
-              }
-            >
-              <option value="">System default</option>
-              {voices.map((v) => (
-                <option key={v.voiceURI} value={v.voiceURI}>
-                  {v.name}
-                </option>
-              ))}
-            </select>
+            <>
+              <select
+                className="field"
+                value={settings.voiceURI ?? ""}
+                onChange={(e) =>
+                  setSetting("voiceURI", e.target.value || undefined)
+                }
+              >
+                <option value="">System default</option>
+                {voices.map((v) => (
+                  <option key={v.voiceURI} value={v.voiceURI}>
+                    {v.name} — {v.lang}
+                  </option>
+                ))}
+              </select>
+              <p className="text-xs text-ink-500">
+                Voices come from your device/browser. On phones, several options
+                may share the same underlying system voice — install more
+                text-to-speech voices in your device settings for real variety.
+              </p>
+            </>
           ) : (
             <p className="text-xs text-ink-500">
               No text-to-speech voices available in this browser.
