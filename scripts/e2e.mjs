@@ -167,6 +167,19 @@ try {
     await page.waitForSelector(".sentence", { timeout: 5000 });
   });
 
+  await step("jump between chapters via the chapter menu", async () => {
+    await page.click('button[title="Jump to a chapter"]');
+    await waitText(page, "Chapters");
+    // Jump to the last chapter entry in the list.
+    await page.evaluate(() => {
+      const items = [...document.querySelectorAll("button")].filter((b) =>
+        /^\s*\d+\s/.test(b.innerText),
+      );
+      items[items.length - 1].click();
+    });
+    await page.waitForSelector(".sentence", { timeout: 5000 });
+  });
+
   await step("enter and exit Drive Mode", async () => {
     await page.click('button[title="Hands-free review for the car"]');
     await waitText(page, "Drive Mode");

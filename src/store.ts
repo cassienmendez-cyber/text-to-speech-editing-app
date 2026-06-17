@@ -28,6 +28,7 @@ const DEFAULT_SETTINGS: Settings = {
   fontScale: 1,
   ttsEngine: "device",
   espeakVoice: "en/en-us",
+  highlightNames: true,
 };
 
 /** Reader font-scale bounds. */
@@ -499,7 +500,7 @@ export const useStore = create<AppState>()(
     }),
     {
       name: "storyscribe-v1",
-      version: 9,
+      version: 10,
       migrate: (persisted: any, version) => {
         if (!persisted) return persisted;
         const projects = persisted.projects ?? {};
@@ -547,6 +548,10 @@ export const useStore = create<AppState>()(
         }
         if (version < 9) {
           // Free offline eSpeak engine option.
+          persisted.settings = { ...DEFAULT_SETTINGS, ...persisted.settings };
+        }
+        if (version < 10) {
+          // Story Bible name-highlighting toggle (defaults on).
           persisted.settings = { ...DEFAULT_SETTINGS, ...persisted.settings };
         }
         return persisted;

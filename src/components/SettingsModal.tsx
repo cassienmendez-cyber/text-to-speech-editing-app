@@ -313,6 +313,25 @@ export default function SettingsModal({ onClose }: { onClose: () => void }) {
 
         <section className="space-y-2">
           <h4 className="text-xs font-semibold uppercase tracking-wide text-ink-400">
+            Reading
+          </h4>
+          <label className="flex items-center gap-2 text-sm text-ink-200">
+            <input
+              type="checkbox"
+              checked={settings.highlightNames}
+              onChange={(e) => setSetting("highlightNames", e.target.checked)}
+            />
+            Highlight character &amp; place names
+          </label>
+          <p className="text-xs text-ink-500">
+            Names you add to the Story Bible are colored and tappable in the
+            text (a quick reference — no API key needed). Turn this off for a
+            fully plain page.
+          </p>
+        </section>
+
+        <section className="space-y-2">
+          <h4 className="text-xs font-semibold uppercase tracking-wide text-ink-400">
             Accessibility
           </h4>
           <label className="flex items-center gap-2 text-sm text-ink-200">

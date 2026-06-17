@@ -16,6 +16,7 @@ interface Props {
   onBookmark: () => void;
   onFontSmaller: () => void;
   onFontLarger: () => void;
+  onOpenChapters: () => void;
 }
 
 const RATES = [0.75, 1, 1.25, 1.5, 1.75, 2];
@@ -27,8 +28,15 @@ export default function PlaybackBar(p: Props) {
       style={{ paddingBottom: "max(0.5rem, env(safe-area-inset-bottom))" }}
     >
       <div className="mx-auto flex max-w-5xl flex-col gap-2">
-        <div className="truncate text-center text-xs text-ink-400">
-          {p.locationLabel}
+        <div className="text-center text-xs text-ink-400">
+          <button
+            className="mx-auto inline-flex max-w-full items-center gap-1 truncate rounded px-2 py-0.5 hover:bg-ink-800 hover:text-ink-200"
+            onClick={p.onOpenChapters}
+            title="Jump to a chapter"
+          >
+            <span className="truncate">{p.locationLabel}</span>
+            <span className="shrink-0 text-[10px]">▾</span>
+          </button>
           {!p.ttsAvailable && (
             <span className="ml-2 text-amber-400">(no text-to-speech here)</span>
           )}
